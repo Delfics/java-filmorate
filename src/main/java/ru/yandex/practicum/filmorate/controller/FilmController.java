@@ -16,7 +16,6 @@ import java.util.Map;
 public class FilmController {
     private final Map<Long, Film> films = new HashMap<>();
     private static final Logger log = LoggerFactory.getLogger(FilmController.class);
-    private final ValidateFilm validateFilm = new ValidateFilm(films, log);
 
     @GetMapping
     public Collection<Film> getAll() {
@@ -26,24 +25,33 @@ public class FilmController {
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
         log.info("Начало создания film - {}", film.getName());
-        validateFilm.validate(film);
-        film.setId(validateFilm.getNextId());
+        ValidateFilm.validate(film);
+        film.setId(getNextId());
         films.put(film.getId(), film);
-        log.info("Успешно создался film - {}", film.getName());
+        log.debug("Успешно создался film - {}", film.getName());
         return film;
     }
 
     @PutMapping
     public Film update(@Valid @RequestBody Film newFilm) {
         log.info("Начало обновления film - {}", newFilm.getName());
-        validateFilm.validate(newFilm);
+        ValidateFilm.validate(newFilm);
         if (films.containsKey(newFilm.getId())) {
             films.put(newFilm.getId(), newFilm);
-            log.info("Успешное обновление film - {}", newFilm.getName());
+            log.debug("Успешное обновление film - {}", newFilm.getName());
         } else {
             log.error("Неправильный id");
             throw new RuntimeException("Не содержит данный id");
         }
         return newFilm;
+    }
+
+    public long getNextId() {
+        long currentMaxId = films.keySet()
+                .stream()
+                .mapToLong(id -> id)
+                .max()
+                .orElse(0);
+        return ++currentMaxId;
     }
 }

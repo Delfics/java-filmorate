@@ -18,7 +18,7 @@ import java.util.Map;
 public class UserController {
     private final Map<Long, User> users = new HashMap<>();
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
-    private final ValidateUser validateUser = new ValidateUser(users, log);
+
 
     @GetMapping
     public Collection<User> getAll() {
@@ -28,8 +28,8 @@ public class UserController {
     @PostMapping
     public User create(@Valid @RequestBody User user) {
         log.info("Начало создания пользователя");
-        validateUser.validate(user);
-        user.setId(validateUser.getNextId());
+        ValidateUser.validate(user);
+        user.setId(getNextId());
         users.put(user.getId(), user);
         log.info("Создание пользователя успешно");
         return user;
@@ -38,7 +38,7 @@ public class UserController {
     @PutMapping
     public User update(@Valid @RequestBody User newUser) {
         log.info("Начало обновления пользователя");
-        validateUser.validate(newUser);
+        ValidateUser.validate(newUser);
         if (users.containsKey(newUser.getId())) {
             users.put(newUser.getId(), newUser);
             log.info("Успешное обновление пользователя");
@@ -46,5 +46,14 @@ public class UserController {
             throw new RuntimeException("Не содержит данный id");
         }
         return newUser;
+    }
+
+    public long getNextId() {
+        long currentMaxId = users.keySet()
+                .stream()
+                .mapToLong(id -> id)
+                .max()
+                .orElse(0);
+        return ++currentMaxId;
     }
 }

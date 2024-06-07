@@ -15,9 +15,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ValidateUserTest {
     User user;
-    Map<Long, User> users = new HashMap<>();
-    private static final Logger log = LoggerFactory.getLogger(ValidateUserTest.class);
-    ValidateUser validateUser = new ValidateUser(users, log);
 
     @Test
     void shouldGetWrongEmail() {
@@ -28,7 +25,7 @@ class ValidateUserTest {
         user.setBirthday(LocalDate.of(1999, 10, 23));
 
         ValidationException thrown = assertThrows(ValidationException.class,
-                () -> validateUser.validate(user), "Электронная почта не может быть пустой и должна" +
+                () -> ValidateUser.validate(user), "Электронная почта не может быть пустой и должна" +
                         " содержать символ @");
 
         assertTrue(thrown.getMessage().contains("Электронная почта не может быть пустой и должна содержать символ @"));
@@ -42,7 +39,7 @@ class ValidateUserTest {
         user.setBirthday(LocalDate.of(1999, 10, 23));
 
         ValidationException thrown = assertThrows(ValidationException.class,
-                () -> validateUser.validate(user), "Электронная почта не может быть пустой и должна" +
+                () -> ValidateUser.validate(user), "Электронная почта не может быть пустой и должна" +
                         " содержать символ @");
 
         assertTrue(thrown.getMessage().contains("Электронная почта не может быть пустой и должна содержать символ @"));
@@ -57,7 +54,7 @@ class ValidateUserTest {
         user.setBirthday(LocalDate.of(1999, 10, 23));
 
         ValidationException thrown = assertThrows(ValidationException.class,
-                () -> validateUser.validate(user), "Логин не может быть пустым и содержать пробелы");
+                () -> ValidateUser.validate(user), "Логин не может быть пустым и содержать пробелы");
 
         assertTrue(thrown.getMessage().contains("Логин не может быть пустым и содержать пробелы"));
     }
@@ -70,7 +67,7 @@ class ValidateUserTest {
         user.setBirthday(LocalDate.of(1999, 10, 23));
 
         ValidationException thrown = assertThrows(ValidationException.class,
-                () -> validateUser.validate(user), "Логин не может быть пустым и содержать пробелы");
+                () -> ValidateUser.validate(user), "Логин не может быть пустым и содержать пробелы");
 
         assertTrue(thrown.getMessage().contains("Логин не может быть пустым и содержать пробелы"));
     }
@@ -84,7 +81,7 @@ class ValidateUserTest {
         user.setBirthday(LocalDate.of(2026, 10, 23));
 
         ValidationException thrown = assertThrows(ValidationException.class,
-                () -> validateUser.validate(user), "Дата рождения не может быть в будущем");
+                () -> ValidateUser.validate(user), "Дата рождения не может быть в будущем");
 
         assertTrue(thrown.getMessage().contains("Дата рождения не может быть в будущем"));
 
@@ -96,7 +93,7 @@ class ValidateUserTest {
         user.setLogin("LoginTest");
         user.setEmail("@gmail.com");
         user.setBirthday(LocalDate.of(2026, 10, 23));
-        validateUser.validate(user);
+        ValidateUser.validate(user);
 
         assertEquals(user.getName(), user.getLogin(), "При пустом поле name, login будет name");
     }

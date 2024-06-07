@@ -1,23 +1,17 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
-import java.util.Map;
 
 public class ValidateFilm {
-    Map<Long, Film> films;
-    Logger log;
-
-    public ValidateFilm(Map<Long, Film> films, Logger log) {
-        this.films = films;
-        this.log = log;
-    }
+    private static final Logger log = LoggerFactory.getLogger(ValidateFilm.class);
 
 
-    public void validate(Film film) {
+    public static void validate(Film film) {
         int maxLength = 200;
         int zero = 0;
         LocalDate data = LocalDate.of(1895, 12, 28);
@@ -34,14 +28,5 @@ public class ValidateFilm {
             log.error("Неправильная продолжительность фильма");
             throw new ValidationException("Продолжительность фильма должна быть положительным числом");
         }
-    }
-
-    public long getNextId() {
-        long currentMaxId = films.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
     }
 }

@@ -2,23 +2,17 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
-import java.util.Map;
 
 
 public class ValidateUser {
-    Map<Long, User> users;
-    Logger log;
+    private static final Logger log = LoggerFactory.getLogger(ValidateUser.class);
 
-    public ValidateUser(Map<Long, User> users, Logger log) {
-        this.users = users;
-        this.log = log;
-    }
-
-    public void validate(User user) {
+    public static void validate(User user) {
         String dog = "@";
         LocalDate data = LocalDate.now();
         if (user.getEmail() == null || !user.getEmail().contains(dog)) {
@@ -34,14 +28,5 @@ public class ValidateUser {
             log.error("Неправильно указана дата рождения");
             throw new ValidationException("Дата рождения не может быть в будущем");
         }
-    }
-
-    public long getNextId() {
-        long currentMaxId = users.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
     }
 }

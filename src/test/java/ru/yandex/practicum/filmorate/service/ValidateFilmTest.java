@@ -7,16 +7,12 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class ValidateFilmTest {
     Film film;
-    Map<Long, Film> films = new HashMap<>();
-    private static final Logger log = LoggerFactory.getLogger(ValidateFilmTest.class);
-    ValidateFilm validateFilm = new ValidateFilm(films, log);
+
 
     @Test
     void shouldGetNameNull() {
@@ -26,7 +22,7 @@ class ValidateFilmTest {
         film.setReleaseDate(LocalDate.of(2000, 9, 19));
 
         ValidationException thrown = assertThrows(ValidationException.class,
-                () -> validateFilm.validate(film), "Название не может быть пустым");
+                () -> ValidateFilm.validate(film), "Название не может быть пустым");
 
         assertTrue(thrown.getMessage().contains("Название не может быть пустым"));
     }
@@ -40,7 +36,7 @@ class ValidateFilmTest {
         film.setReleaseDate(LocalDate.of(2000, 9, 19));
 
         ValidationException thrown = assertThrows(ValidationException.class,
-                () -> validateFilm.validate(film), "Название не может быть пустым");
+                () -> ValidateFilm.validate(film), "Название не может быть пустым");
 
         assertTrue(thrown.getMessage().contains("Название не может быть пустым"));
     }
@@ -56,7 +52,7 @@ class ValidateFilmTest {
         film.setReleaseDate(LocalDate.of(2000, 9, 19));
 
         ValidationException thrown = assertThrows(ValidationException.class,
-                () -> validateFilm.validate(film), "Максимальная длина описания — 200 символов");
+                () -> ValidateFilm.validate(film), "Максимальная длина описания — 200 символов");
 
         assertTrue(thrown.getMessage().contains("Максимальная длина описания — 200 символов"));
     }
@@ -70,7 +66,7 @@ class ValidateFilmTest {
         film.setReleaseDate(LocalDate.of(1893, 9, 19));
 
         ValidationException thrown = assertThrows(ValidationException.class,
-                () -> validateFilm.validate(film), "Дата релиза — не раньше 28 декабря 1895 года");
+                () -> ValidateFilm.validate(film), "Дата релиза — не раньше 28 декабря 1895 года");
 
         assertTrue(thrown.getMessage().contains("Дата релиза — не раньше 28 декабря 1895 года"));
     }
@@ -84,7 +80,7 @@ class ValidateFilmTest {
         film.setReleaseDate(LocalDate.of(1993, 9, 19));
 
         ValidationException thrown = assertThrows(ValidationException.class,
-                () -> validateFilm.validate(film), "Продолжительность фильма должна быть положительным числом");
+                () -> ValidateFilm.validate(film), "Продолжительность фильма должна быть положительным числом");
 
         assertTrue(thrown.getMessage().contains("Продолжительность фильма должна быть положительным числом"));
     }
