@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Film.
@@ -17,4 +19,7 @@ public class Film {
     LocalDate releaseDate;
     @NotNull
     Integer duration;
+    Set<Long> likes = new HashSet<>();
+
+
 }
