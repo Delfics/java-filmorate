@@ -11,45 +11,45 @@ import java.util.List;
 @RestController
 @RequestMapping("/films")
 public class FilmController {
-    private final FilmService filmServiceImpl;
+    private final FilmService filmService;
 
-    public FilmController(FilmService filmServiceImpl) {
-        this.filmServiceImpl = filmServiceImpl;
+    public FilmController(FilmService filmService) {
+        this.filmService = filmService;
     }
 
     @GetMapping
     public Collection<Film> getAll() {
-        return filmServiceImpl.getAllValues();
+        return filmService.getAllValues();
     }
 
     @GetMapping("/{id}")
     public Film getById(@PathVariable Long id) {
-        return filmServiceImpl.getById(id);
+        return filmService.getById(id);
     }
 
     @GetMapping("/popular{count}")
     public List<Film> getPopularFilms(@PathVariable @RequestParam(defaultValue = "10") Long count) {
-        return filmServiceImpl.getPopularFilms(count);
+        return filmService.getPopularFilms(count);
     }
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        return filmServiceImpl.create(film);
+        return filmService.create(film);
     }
 
     @PutMapping
     public Film update(@Valid @RequestBody Film newFilm) {
-        return filmServiceImpl.update(newFilm);
+        return filmService.update(newFilm);
     }
 
     @PutMapping("{id}/like/{userId}")
     public void addLike(@PathVariable Long id, @PathVariable Long userId) {
-        filmServiceImpl.addLike(id, userId);
+        filmService.addLike(id, userId);
     }
 
     @DeleteMapping("{id}/like/{userId}")
     public void removeLike(@PathVariable Long id, @PathVariable Long userId) {
-        filmServiceImpl.removeLike(id, userId);
+        filmService.removeLike(id, userId);
     }
 
 }

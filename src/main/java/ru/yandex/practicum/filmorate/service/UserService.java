@@ -24,5 +24,4 @@ public interface UserService {
 
     void remove(User user);
 
-    long getNextId();
 }

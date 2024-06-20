@@ -16,12 +16,12 @@ import java.util.stream.Collectors;
 @Service
 public class UserServiceImpl implements UserService {
     private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
-    private final UserStorage inMemoryUserStorage;
+    private final UserStorage userStorage;
 
 
     @Autowired
     public UserServiceImpl(UserStorage inMemoryUserStorage) {
-        this.inMemoryUserStorage = inMemoryUserStorage;
+        this.userStorage = inMemoryUserStorage;
     }
 
     @Override
@@ -31,15 +31,15 @@ public class UserServiceImpl implements UserService {
         throwNotFoundIfGetAllIsEmpty();
         throwNotFoundIfUserOrUser1NotExist(id, friendId);
 
-        User gotUser1 = inMemoryUserStorage.getById(id);
-        User gotUser2 = inMemoryUserStorage.getById(friendId);
+        User gotUser1 = userStorage.getById(id);
+        User gotUser2 = userStorage.getById(friendId);
 
         gotUser1.getFriends().add(gotUser2.getId());
         gotUser2.getFriends().add(gotUser1.getId());
-        inMemoryUserStorage.update(gotUser1);
-        inMemoryUserStorage.update(gotUser2);
+        userStorage.update(gotUser1);
+        userStorage.update(gotUser2);
 
-        log.info(gotUser1.getName() + " и " + gotUser2.getName() + " стали друзьями успешно.");
+        log.info("{} и {} стали друзьями успешно.", gotUser1.getName(), gotUser2.getName());
     }
 
     @Override
@@ -49,14 +49,14 @@ public class UserServiceImpl implements UserService {
         throwNotFoundIfGetAllIsEmpty();
         throwNotFoundIfUserOrUser1NotExist(id, friendId);
 
-        User gotUser1 = inMemoryUserStorage.getById(id);
-        User gotUser2 = inMemoryUserStorage.getById(friendId);
+        User gotUser1 = userStorage.getById(id);
+        User gotUser2 = userStorage.getById(friendId);
         gotUser1.getFriends().remove(gotUser2.getId());
         gotUser2.getFriends().remove(gotUser1.getId());
-        inMemoryUserStorage.update(gotUser1);
-        inMemoryUserStorage.update(gotUser2);
+        userStorage.update(gotUser1);
+        userStorage.update(gotUser2);
 
-        log.info(gotUser1.getName() + " и " + gotUser2.getName() + " больше не друзья успешно.");
+        log.info("{} и {} больше не друзья успешно.", gotUser1.getName(), gotUser2.getName());
     }
 
     @Override
@@ -66,25 +66,25 @@ public class UserServiceImpl implements UserService {
         throwNotFoundIfGetAllIsEmpty();
         throwNotFoundIfUserOrUser1NotExist(id, otherId);
 
-        User gotUser1 = inMemoryUserStorage.getById(id);
-        User gotUser2 = inMemoryUserStorage.getById(otherId);
+        User gotUser1 = userStorage.getById(id);
+        User gotUser2 = userStorage.getById(otherId);
 
         List<Long> friendsIds = gotUser1.getFriends().stream()
                 .filter((numb) -> gotUser2.getFriends().contains(numb))
                 .toList();
 
         List<User> collectiveFriends = friendsIds.stream()
-                .map(inMemoryUserStorage::getById)
+                .map(userStorage::getById)
                 .collect(Collectors.toList());
 
-        log.info(gotUser1.getName() + " " + gotUser2.getName() + " список общих друзей успешно получен");
+        log.info("{} {} список общих друзей успешно получен", gotUser1.getName(), gotUser2.getName());
         return collectiveFriends;
     }
 
     @Override
     public User getById(Long id) {
-        if (inMemoryUserStorage.getAll().containsKey(id)) {
-            return inMemoryUserStorage.getAll().get(id);
+        if (userStorage.getAll().containsKey(id)) {
+            return userStorage.getAll().get(id);
         } else {
             throw new NotFoundException("Пользователь не найден с таким id " + id);
         }
@@ -93,13 +93,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> getAllFriends(Long id) {
         log.info("Начало получение списка друзей");
-        if (inMemoryUserStorage.getById(id) == null) {
+        if (userStorage.getById(id) == null) {
             throw new NotFoundException("Пользователь не найден с таким id " + id);
         }
 
-        User user = inMemoryUserStorage.getById(id);
+        User user = userStorage.getById(id);
         List<User> friends = user.getFriends().stream()
-                .map((numb) -> inMemoryUserStorage.getAll().get(numb))
+                .map((numb) -> userStorage.getAll().get(numb))
                 .toList();
 
         log.info("Список друзей получен пользователя " + id);
@@ -111,9 +111,9 @@ public class UserServiceImpl implements UserService {
         log.info("Начало создания пользователя - {}", user);
 
         ValidateUser.validate(user);
-        user.setId(getNextId());
-        User user1 = inMemoryUserStorage.create(user);
-        if (inMemoryUserStorage.getAll().containsKey(user1.getId())) {
+        user.setId(userStorage.getNextId());
+        User user1 = userStorage.create(user);
+        if (userStorage.getAll().containsKey(user1.getId())) {
             log.debug("Создание пользователя успешно");
         }
         return user1;
@@ -124,8 +124,8 @@ public class UserServiceImpl implements UserService {
         log.info("Начало обновления пользователя - {}", newUser);
 
         ValidateUser.validate(newUser);
-        if (inMemoryUserStorage.getAll().containsKey(newUser.getId())) {
-            User update = inMemoryUserStorage.update(newUser);
+        if (userStorage.getAll().containsKey(newUser.getId())) {
+            User update = userStorage.update(newUser);
 
             log.debug("Успешное обновление пользователя");
             return update;
@@ -136,42 +136,32 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Collection<User> getAllValues() {
-        return inMemoryUserStorage.getAll().values();
+        return userStorage.getAll().values();
     }
 
     @Override
     public void remove(User user) {
         log.info("Начало удаление пользователя - {}", user);
 
-        if (inMemoryUserStorage.getAll().containsKey(user.getId())) {
-            inMemoryUserStorage.remove(user);
+        if (userStorage.getAll().containsKey(user.getId())) {
+            userStorage.remove(user);
 
             log.debug("Успешное удаление пользователя");
         } else {
-            throw new NotFoundException("Не содержит данный пользователя " + user);
+            throw new NotFoundException("Не содержит данный пользователя ".concat(user.toString()));
         }
     }
 
-    @Override
-    public long getNextId() {
-        long currentMaxId = inMemoryUserStorage.getAll().keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
-    }
-
     private void throwNotFoundIfGetAllIsEmpty() {
-        if (inMemoryUserStorage.getAll().isEmpty()) {
+        if (userStorage.getAll().isEmpty()) {
             throw new NotFoundException("Список пользователей пуст, создайте пользователей");
         }
     }
 
     private void throwNotFoundIfUserOrUser1NotExist(Long id, Long friendId) {
-        if (!inMemoryUserStorage.getAll().containsKey(id)) {
+        if (!userStorage.getAll().containsKey(id)) {
             throw new NotFoundException("Пользователь с таким " + id + " не найден");
-        } else if (!inMemoryUserStorage.getAll().containsKey(friendId)) {
+        } else if (!userStorage.getAll().containsKey(friendId)) {
             throw new NotFoundException("Пользователь с таким " + friendId + " не найден");
         }
     }

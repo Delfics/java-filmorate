@@ -35,4 +35,14 @@ public class InMemoryUserStorage implements UserStorage {
     public void remove(User user) {
         users.remove(user.getId());
     }
+
+    @Override
+    public long getNextId() {
+        long currentMaxId = users.keySet()
+                .stream()
+                .mapToLong(id -> id)
+                .max()
+                .orElse(0);
+        return ++currentMaxId;
+    }
 }

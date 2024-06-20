@@ -35,7 +35,7 @@ public class FilmServiceImpl implements FilmService {
         film.getLikes().add(user.getId());
         inMemoryFilmStorage.update(film);
 
-        log.info("Лайк добавлен к фильму с id " + film.getId() + " от пользователя с id: " + user.getId());
+        log.info("Лайк добавлен к фильму с id {} от пользователя с id: {}", film.getId(), user.getId());
     }
 
     @Override
@@ -49,7 +49,7 @@ public class FilmServiceImpl implements FilmService {
         film.getLikes().remove(user.getId());
         inMemoryFilmStorage.update(film);
 
-        log.info("Лайк удален у фильма с id " + film.getId() + " от пользователя с id: " + user.getId());
+        log.info("Лайк удален у фильма с id {} от пользователя с id: {}", film.getId(), user.getId());
     }
 
     @Override
@@ -96,10 +96,10 @@ public class FilmServiceImpl implements FilmService {
         log.info("Начало создания film - {}", film.getName());
 
         ValidateFilm.validate(film);
-        film.setId(getNextId());
+        film.setId(inMemoryFilmStorage.getNextId());
         Film film1 = inMemoryFilmStorage.create(film);
         if (inMemoryFilmStorage.getAll().containsKey(film.getId())) {
-            log.debug("Успешно создался film с id- {}", film.getId());
+            log.debug("Успешно создался film с id - {}", film.getId());
         }
         return film1;
     }
@@ -129,16 +129,6 @@ public class FilmServiceImpl implements FilmService {
         } else {
             throw new NotFoundException("Не содержит фильм с таким " + film.getId());
         }
-    }
-
-    @Override
-    public long getNextId() {
-        long currentMaxId = inMemoryFilmStorage.getAll().keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
     }
 
     private void throwNotFoundIfUserOrUser1NotExist(Long filmId, Long userId) {
