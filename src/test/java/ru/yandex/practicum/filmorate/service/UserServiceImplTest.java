@@ -3,11 +3,12 @@ package ru.yandex.practicum.filmorate.service;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.dao.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.dao.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -26,7 +27,7 @@ class UserServiceImplTest {
 
         userServiceImpl.create(user);
 
-        assertEquals(user, inMemoryUserStorage.getAll().get(user.getId()), "Пользоватеь был создан");
+        assertEquals(user, inMemoryUserStorage.getAll().get(user.getId().intValue()), "Пользоватеь был создан");
     }
 
     @Test
@@ -38,9 +39,9 @@ class UserServiceImplTest {
         user.setName("NameTest");
 
         userServiceImpl.create(user);
-        userServiceImpl.remove(user);
+        userServiceImpl.deleteById(user.getId());
 
-        assertNotEquals(user, inMemoryUserStorage.getAll().get(user.getId()), "Пользователь был удален");
+        assertNotEquals(user, inMemoryUserStorage.getAll().get(user.getId().intValue()), "Пользователь был удален");
     }
 
     @Test
@@ -60,7 +61,7 @@ class UserServiceImplTest {
 
         userServiceImpl.update(user);
 
-        assertEquals(user, inMemoryUserStorage.getAll().get(user.getId()), "Обновили данные ");
+        assertEquals(user, inMemoryUserStorage.getAll().get(user.getId().intValue()), "Обновили данные ");
     }
 
     @Test
@@ -143,7 +144,7 @@ class UserServiceImplTest {
         userServiceImpl.create(user1);
 
         userServiceImpl.addFriend(user.getId(), user1.getId());
-        userServiceImpl.removeFriend(user.getId(), user1.getId());
+        userServiceImpl.deleteFriendById(user.getId(), user1.getId());
 
         assertTrue(user.getFriends().isEmpty(), "Список друзей user пуст");
         assertTrue(user1.getFriends().isEmpty(), "Список друзей user1 пуст");
@@ -221,13 +222,13 @@ class UserServiceImplTest {
         userServiceImpl.addFriend(user.getId(), userGlobal.getId());
         userServiceImpl.addFriend(user1.getId(), userGlobal.getId());
 
-        List<User> collectiveFriends = userServiceImpl.getCollectiveFriends(user.getId(), user.getId());
+        Set<User> collectiveFriends = userServiceImpl.getCollectiveFriends(user.getId(), user.getId());
 
         assertTrue(collectiveFriends.contains(userGlobal), "Содержит общего друга");
 
-        userServiceImpl.remove(userGlobal);
+        userServiceImpl.deleteById(userGlobal.getId());
 
-        List<User> collectiveFriends1 = userServiceImpl.getCollectiveFriends(user.getId(), user.getId());
+        Set<User> collectiveFriends1 = userServiceImpl.getCollectiveFriends(user.getId(), user.getId());
 
         assertNotEquals(collectiveFriends, collectiveFriends1, "Не Содержит общего друга");
     }

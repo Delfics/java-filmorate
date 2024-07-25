@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/users")
@@ -30,16 +31,6 @@ public class UserController {
         return userService.getById(id);
     }
 
-    @GetMapping("/{id}/friends")
-    public List<User> getAllFriends(@PathVariable Long id) {
-        return userService.getAllFriends(id);
-    }
-
-    @GetMapping("/{id}/friends/common/{otherId}")
-    public List<User> getCollectiveFriends(@PathVariable Long id, @PathVariable Long otherId) {
-        return userService.getCollectiveFriends(id, otherId);
-    }
-
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public User create(@Valid @RequestBody User user) {
@@ -51,13 +42,34 @@ public class UserController {
         return userService.update(newUser);
     }
 
-    @PutMapping("/{id}/friends/{friendId}")
-    public void addFriend(@PathVariable Long id, @PathVariable Long friendId) {
-        userService.addFriend(id, friendId);
+    @DeleteMapping("/{id}")
+    public void deleteById(@PathVariable Long id) {
+        userService.deleteById(id);
     }
 
-    @DeleteMapping("/{id}/friends/{friendId}")
-    public void removeFriend(@PathVariable Long id, @PathVariable Long friendId) {
-        userService.removeFriend(id, friendId);
+    @PutMapping("/{userId}/friends/{friendId}")
+    public void addFriend(@PathVariable Long userId, @PathVariable Long friendId) {
+        userService.addFriend(userId, friendId);
     }
+
+    @DeleteMapping("/{userId}/friends/{friendId}")
+    public void deleteFriend(@PathVariable Long userId, @PathVariable Long friendId) {
+        userService.deleteFriendById(userId, friendId);
+    }
+
+    @GetMapping("/{userId}/friends")
+    public List<User> getAllFriends(@PathVariable Long userId) {
+        return userService.getAllFriends(userId);
+    }
+
+    @GetMapping("/{userId}/friends/common/{otherId}")
+    public Set<User> getCollectiveFriends(@PathVariable Long userId, @PathVariable Long otherId) {
+        return userService.getCollectiveFriends(userId, otherId);
+    }
+
+    @PostMapping("/{userId}/friends/{friendId}/confirm")
+    public void confirmFriend(@PathVariable Long userId, @PathVariable Long friendId) {
+        userService.confirmFriend(userId, friendId);
+    }
+
 }

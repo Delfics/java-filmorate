@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.dao.film.FilmStorage;
+import ru.yandex.practicum.filmorate.dao.user.UserStorage;
 
 import java.util.*;
 
@@ -31,7 +31,7 @@ public class FilmServiceImpl implements FilmService {
         throwNotFoundIfUserOrUser1NotExist(filmId, userId);
 
         Film film = inMemoryFilmStorage.getAll().get(filmId);
-        User user = inMemoryUserStorage.getAll().get(userId);
+        User user = inMemoryUserStorage.getAll().get(Math.toIntExact(userId));
         film.getLikes().add(user.getId());
         inMemoryFilmStorage.update(film);
 
@@ -45,7 +45,7 @@ public class FilmServiceImpl implements FilmService {
         throwNotFoundIfUserOrUser1NotExist(filmId, userId);
 
         Film film = inMemoryFilmStorage.getAll().get(filmId);
-        User user = inMemoryUserStorage.getAll().get(userId);
+        User user = inMemoryUserStorage.getAll().get(Math.toIntExact(userId));
         film.getLikes().remove(user.getId());
         inMemoryFilmStorage.update(film);
 
@@ -132,7 +132,7 @@ public class FilmServiceImpl implements FilmService {
     }
 
     private void throwNotFoundIfUserOrUser1NotExist(Long filmId, Long userId) {
-        if (!inMemoryUserStorage.getAll().containsKey(userId)) {
+        if (!inMemoryUserStorage.getAll().contains(userId)) {
             throw new NotFoundException("Пользователь с таким id: " + userId + " не найден");
         } else if (!inMemoryFilmStorage.getAll().containsKey(filmId)) {
             throw new NotFoundException("Фильм с таким id: " + filmId + " не найден");

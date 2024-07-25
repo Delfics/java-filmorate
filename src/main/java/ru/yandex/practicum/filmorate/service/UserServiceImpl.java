@@ -4,106 +4,46 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.user.UserStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
 @Service
 public class UserServiceImpl implements UserService {
     private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
-    private final UserStorage userStorage;
+    private final UserStorage userDbStorage;
 
 
     @Autowired
     public UserServiceImpl(UserStorage inMemoryUserStorage) {
-        this.userStorage = inMemoryUserStorage;
+        this.userDbStorage = inMemoryUserStorage;
     }
 
     @Override
-    public void addFriend(Long id, Long friendId) {
-        log.info("Начало добавление пользователей в друзья");
+    public Collection<User> getAllValues() {
+        List<User> allUsers = userDbStorage.getAll();
 
-        throwNotFoundIfGetAllIsEmpty();
-        throwNotFoundIfUserOrUser1NotExist(id, friendId);
+        allUsers.forEach(user -> {
+            List<User> allFriends = getAllFriends(user.getId());
+            user.setFriends(allFriends.stream().map(User::getId).collect(Collectors.toSet()));
+        });
 
-        User gotUser1 = userStorage.getById(id);
-        User gotUser2 = userStorage.getById(friendId);
-
-        gotUser1.getFriends().add(gotUser2.getId());
-        gotUser2.getFriends().add(gotUser1.getId());
-        userStorage.update(gotUser1);
-        userStorage.update(gotUser2);
-
-        log.info("{} и {} стали друзьями успешно.", gotUser1.getName(), gotUser2.getName());
-    }
-
-    @Override
-    public void removeFriend(Long id, Long friendId) {
-        log.info("Начало удаление пользователей из друзей");
-
-        throwNotFoundIfGetAllIsEmpty();
-        throwNotFoundIfUserOrUser1NotExist(id, friendId);
-
-        User gotUser1 = userStorage.getById(id);
-        User gotUser2 = userStorage.getById(friendId);
-        gotUser1.getFriends().remove(gotUser2.getId());
-        gotUser2.getFriends().remove(gotUser1.getId());
-        userStorage.update(gotUser1);
-        userStorage.update(gotUser2);
-
-        log.info("{} и {} больше не друзья успешно.", gotUser1.getName(), gotUser2.getName());
-    }
-
-    @Override
-    public List<User> getCollectiveFriends(Long id, Long otherId) {
-        log.info("Начало получение списка общих друзей");
-
-        throwNotFoundIfGetAllIsEmpty();
-        throwNotFoundIfUserOrUser1NotExist(id, otherId);
-
-        User gotUser1 = userStorage.getById(id);
-        User gotUser2 = userStorage.getById(otherId);
-
-        List<Long> friendsIds = gotUser1.getFriends().stream()
-                .filter((numb) -> gotUser2.getFriends().contains(numb))
-                .toList();
-
-        List<User> collectiveFriends = friendsIds.stream()
-                .map(userStorage::getById)
-                .collect(Collectors.toList());
-
-        log.info("{} {} список общих друзей успешно получен", gotUser1.getName(), gotUser2.getName());
-        return collectiveFriends;
+        return allUsers;
     }
 
     @Override
     public User getById(Long id) {
-        if (userStorage.getAll().containsKey(id)) {
-            return userStorage.getAll().get(id);
-        } else {
-            throw new NotFoundException("Пользователь не найден с таким id " + id);
-        }
-    }
+        User user = userDbStorage.getById(id);
 
-    @Override
-    public List<User> getAllFriends(Long id) {
-        log.info("Начало получение списка друзей");
-        if (userStorage.getById(id) == null) {
-            throw new NotFoundException("Пользователь не найден с таким id " + id);
-        }
+        List<User> allFriends = getAllFriends(user.getId());
 
-        User user = userStorage.getById(id);
-        List<User> friends = user.getFriends().stream()
-                .map((numb) -> userStorage.getAll().get(numb))
-                .toList();
+        user.setFriends(allFriends.stream().map(User::getId).collect(Collectors.toSet()));
 
-        log.info("Список друзей получен пользователя " + id);
-        return friends;
+        return user;
     }
 
     @Override
@@ -111,12 +51,8 @@ public class UserServiceImpl implements UserService {
         log.info("Начало создания пользователя - {}", user);
 
         ValidateUser.validate(user);
-        user.setId(userStorage.getNextId());
-        User user1 = userStorage.create(user);
-        if (userStorage.getAll().containsKey(user1.getId())) {
-            log.debug("Создание пользователя успешно");
-        }
-        return user1;
+
+        return userDbStorage.create(user);
     }
 
     @Override
@@ -124,8 +60,8 @@ public class UserServiceImpl implements UserService {
         log.info("Начало обновления пользователя - {}", newUser);
 
         ValidateUser.validate(newUser);
-        if (userStorage.getAll().containsKey(newUser.getId())) {
-            User update = userStorage.update(newUser);
+        if (userDbStorage.getAll().stream().anyMatch(user -> user.getId().equals(newUser.getId()))) {
+            User update = userDbStorage.update(newUser);
 
             log.debug("Успешное обновление пользователя");
             return update;
@@ -135,34 +71,86 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Collection<User> getAllValues() {
-        return userStorage.getAll().values();
+    public void deleteById(Long id) {
+        log.info("Начало удаление пользователя - {}", id);
+
+        boolean result = userDbStorage.deleteById(id);
+
+        if (result) {
+            log.debug("Успешное удаление пользователя");
+        } else {
+            throw new NotFoundException("Не содержит данный пользователя ".concat(id.toString()));
+        }
     }
 
     @Override
-    public void remove(User user) {
-        log.info("Начало удаление пользователя - {}", user);
+    public void addFriend(Long userId, Long friendId) {
+        log.info("Начало добавление пользователей в друзья");
 
-        if (userStorage.getAll().containsKey(user.getId())) {
-            userStorage.remove(user);
+        User user = userDbStorage.getById(userId);
+        User friend = userDbStorage.getById(friendId);
 
-            log.debug("Успешное удаление пользователя");
+        if (user != null && friend != null) {
+            userDbStorage.addFriend(userId, friendId);
+        }
+        log.info("{} и {} стали друзьями успешно.", user.getName(), friend.getName());
+    }
+
+    @Override
+    public void deleteFriendById(Long userId, Long friendId) {
+        log.info("Начало удаление пользователей из друзей");
+
+        User user = userDbStorage.getById(userId);
+        User friend = userDbStorage.getById(friendId);
+
+        if (user != null && friend != null) {
+            boolean result = userDbStorage.deleteFriend(userId, friendId);
+
+            if (result) {
+                log.info("{} и {} больше не друзья успешно.", user.getName(), friend.getName());
+
+            }
         } else {
-            throw new NotFoundException("Не содержит данный пользователя ".concat(user.toString()));
+            throw new NotFoundException("Пользователи " + user.getName() + " или " + friend.getName() + " не найдены");
         }
     }
 
-    private void throwNotFoundIfGetAllIsEmpty() {
-        if (userStorage.getAll().isEmpty()) {
-            throw new NotFoundException("Список пользователей пуст, создайте пользователей");
-        }
+    @Override
+    public Set<User> getCollectiveFriends(Long id, Long otherId) {
+        log.info("Начало получение списка общих друзей");
+
+        List<User> userFriends = getAllFriends(id);
+        List<User> otherFriends = getAllFriends(otherId);
+
+        Set<User> result = new HashSet<>();
+        userFriends.forEach(user -> {
+            result.addAll(otherFriends.stream().filter(otherFriend ->
+                otherFriend.getId().equals(user.getId()))
+                    .collect(Collectors.toSet()));
+        });
+
+        log.info("Для {} и {} список общих друзей успешно получен", id, otherId);
+        return result;
     }
 
-    private void throwNotFoundIfUserOrUser1NotExist(Long id, Long friendId) {
-        if (!userStorage.getAll().containsKey(id)) {
-            throw new NotFoundException("Пользователь с таким " + id + " не найден");
-        } else if (!userStorage.getAll().containsKey(friendId)) {
-            throw new NotFoundException("Пользователь с таким " + friendId + " не найден");
+    @Override
+    public List<User> getAllFriends(Long id) {
+        log.info("Начало получение списка друзей");
+        if (userDbStorage.getById(id) == null) {
+            throw new NotFoundException("Пользователь не найден с таким id " + id);
         }
+
+        User user = userDbStorage.getById(id);
+        List<User> friends = user.getFriends().stream()
+                .map((numb) -> userDbStorage.getAll().get(Math.toIntExact(numb)))
+                .toList();
+
+        log.info("Список друзей получен пользователя " + id);
+        return friends;
+    }
+
+    @Override
+    public void confirmFriend(Long userId, Long friendId) {
+
     }
 }

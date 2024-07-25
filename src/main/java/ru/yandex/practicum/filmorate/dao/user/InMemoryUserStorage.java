@@ -1,18 +1,17 @@
-package ru.yandex.practicum.filmorate.storage.user;
+package ru.yandex.practicum.filmorate.dao.user;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class InMemoryUserStorage implements UserStorage {
     private final Map<Long, User> users = new HashMap<>();
 
     @Override
-    public Map<Long, User> getAll() {
-        return users;
+    public List<User> getAll() {
+        return new ArrayList<>(users.values());
     }
 
     @Override
@@ -32,11 +31,26 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void remove(User user) {
-        users.remove(user.getId());
+    public boolean deleteById(Long id) {
+       users.remove(id);
+       return true;
     }
 
     @Override
+    public void addFriend(Long userId, Long friendId) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public boolean deleteFriend(Long userId, Long friendId) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void confirmFriend(Long userId, Long friendId) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
     public long getNextId() {
         long currentMaxId = users.keySet()
                 .stream()
