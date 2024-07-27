@@ -21,6 +21,7 @@ public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
     private final UserRowMapper userRowMapper;
     private final FriendRowMapper friendRowMapper;
+    private GeneratedKeyHolder keyHolder;
 
     @Override
     public List<User> getAll() {
@@ -30,7 +31,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User create(User user) {
-        GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
+        keyHolder = new GeneratedKeyHolder();
 
         int result = jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement
@@ -55,13 +56,12 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User getById(Long id) {
         String query = "SELECT * FROM users WHERE id = ?;";
-        User user = jdbcTemplate.queryForObject(query, userRowMapper, id);
-        return user;
+        return jdbcTemplate.queryForObject(query, userRowMapper, id);
     }
 
     @Override
     public User update(User newUser) {
-        GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
+        keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement
@@ -92,7 +92,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void addFriend(Long userId, Long friendId) {
-        GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
+        keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(con -> {
             PreparedStatement ps = con.prepareStatement(

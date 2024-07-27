@@ -91,6 +91,19 @@ VALUES (NEXT VALUE FOR mpa_seq, 'G', ' — у фильма нет возраст
        (NEXT VALUE FOR mpa_seq, 'R', ' — лицам до 17 лет просматривать фильм можно только в присутствии взрослого.'),
        (NEXT VALUE FOR mpa_seq, 'NC-17', ' — лицам до 18 лет просмотр запрещён.');
 
+INSERT INTO genre (id, name)
+VALUES (NEXT VALUE FOR genre_seq, 'COMEDY'),
+       (NEXT VALUE FOR genre_seq, 'DRAMA'),
+       (NEXT VALUE FOR genre_seq, 'CARTOON'),
+       (NEXT VALUE FOR genre_seq, 'THRILLER'),
+       (NEXT VALUE FOR genre_seq, 'DOCUMENTARY'),
+       (NEXT VALUE FOR genre_seq, 'ACTION');
+
+
+
+
+
+
 
 
 

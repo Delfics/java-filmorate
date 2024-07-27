@@ -1,11 +1,14 @@
 package ru.yandex.practicum.filmorate.dao.film;
 
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.enums.Genre;
 
-import java.util.Map;
+import java.util.List;
+import java.util.Set;
 
 public interface FilmStorage {
-    Map<Long, Film> getAll();
+    List<Film> getAll();
 
     Film create(Film film);
 
@@ -13,7 +16,11 @@ public interface FilmStorage {
 
     Film getById(Long id);
 
-    void remove(Film film);
+    boolean deleteById (Long id);
 
-    long getNextId();
+    Mpa getMpa(Long filmMpaId);
+
+    Set<Genre> getGenres(Long filmId);
+
+    Set<Long> getLikes (Long filmId);
 }

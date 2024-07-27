@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.dao.film.FilmStorage;
 import ru.yandex.practicum.filmorate.dao.user.UserStorage;
@@ -30,7 +31,7 @@ public class FilmServiceImpl implements FilmService {
 
         throwNotFoundIfUserOrUser1NotExist(filmId, userId);
 
-        Film film = inMemoryFilmStorage.getAll().get(filmId);
+        Film film = inMemoryFilmStorage.getAll().get(Math.toIntExact(filmId));
         User user = inMemoryUserStorage.getAll().get(Math.toIntExact(userId));
         film.getLikes().add(user.getId());
         inMemoryFilmStorage.update(film);
@@ -57,7 +58,7 @@ public class FilmServiceImpl implements FilmService {
         log.info("Начало получения списка фильмов, размер - {}", size);
 
         Comparator<Film> comparator = Comparator.comparing((o) -> o.getLikes().size());
-        List<Film> filmsValue = new ArrayList<>(inMemoryFilmStorage.getAll().values());
+        List<Film> filmsValue = new ArrayList<>(inMemoryFilmStorage.getAll());
         if (filmsValue.isEmpty()) {
             throw new NotFoundException("Список фильмов пуст");
         }
@@ -79,16 +80,18 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public Collection<Film> getAllValues() {
-        return inMemoryFilmStorage.getAll().values();
+        return inMemoryFilmStorage.getAll();
     }
 
     @Override
     public Film getById(Long id) {
-        if (inMemoryFilmStorage.getAll().containsKey(id)) {
-            return inMemoryFilmStorage.getAll().get(id);
-        } else {
+        Film film = inMemoryFilmStorage.getById(id);
+        if (film == null) {
             throw new NotFoundException("Фильм не найден с таким id " + id);
         }
+        Mpa mpaForFilm = inMemoryFilmStorage.getMpa(film.getId());
+        film.setMpa(mpaForFilm);
+        return film;
     }
 
     @Override
@@ -96,9 +99,9 @@ public class FilmServiceImpl implements FilmService {
         log.info("Начало создания film - {}", film.getName());
 
         ValidateFilm.validate(film);
-        film.setId(inMemoryFilmStorage.getNextId());
+        /*film.setId(inMemoryFilmStorage.getNextId());*/
         Film film1 = inMemoryFilmStorage.create(film);
-        if (inMemoryFilmStorage.getAll().containsKey(film.getId())) {
+        if (inMemoryFilmStorage.getAll().contains(film.getId())) {
             log.debug("Успешно создался film с id - {}", film.getId());
         }
         return film1;
@@ -119,7 +122,7 @@ public class FilmServiceImpl implements FilmService {
     }
 
     @Override
-    public void remove(Film film) {
+    public void deleteById(Film film) {
         log.info("Начало удаление фильма - {}", film);
 
         if (inMemoryFilmStorage.getAll().containsKey(film.getId())) {

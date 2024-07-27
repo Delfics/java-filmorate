@@ -20,5 +20,5 @@ public interface FilmService {
 
     Film update(Film newFilm);
 
-    void remove(Film film);
+    void deleteById(Long id);
 }
