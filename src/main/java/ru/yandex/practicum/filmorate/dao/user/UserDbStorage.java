@@ -36,7 +36,7 @@ public class UserDbStorage implements UserStorage {
         int result = jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement
                     ("INSERT INTO users (id, email, login, name, birthday)" +
-                                    " VALUES (NEXT VALUE FOR USER_SEQ, ?, ?, ? ,?,);",
+                                    " VALUES (NEXT VALUE FOR USER_SEQ, ?, ?, ? ,?);",
                             Statement.RETURN_GENERATED_KEYS);
             ps.setObject(1, user.getEmail());
             ps.setObject(2, user.getLogin());
@@ -65,8 +65,8 @@ public class UserDbStorage implements UserStorage {
 
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement
-                    ("UPDATE INTO users (id, email, login, name, birthday)" +
-                                    " VALUES (?, ?, ?, ? ,?) WHERE id = ? ;",
+                    ("UPDATE users SET id = ?, email = ?, login = ?, name = ?, birthday = ?" +
+                                    "WHERE id = ? ;",
                             Statement.RETURN_GENERATED_KEYS);
             ps.setObject(1, newUser.getId());
             ps.setObject(2, newUser.getEmail());
@@ -91,7 +91,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public void addFriend(Long userId, Long friendId) {
+    public User addFriend(Long userId, Long friendId) {
         keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(con -> {
@@ -102,12 +102,13 @@ public class UserDbStorage implements UserStorage {
             ps.setObject(3, Friendship.NOT_CONFIRMED);
             return ps;
         }, keyHolder);
+        return getById(userId);
     }
 
     @Override
     public boolean deleteFriend(Long userId, Long friendId) {
-        return jdbcTemplate.update("DELETE FROM friends WHERE user_id = ? " +
-                "AND friends_id = ?;", userId, friendId) > 0;
+        boolean b = jdbcTemplate.update("DELETE FROM friends WHERE user_id = ? ;", userId) > 0;
+        return b;
     }
 
     @Override
@@ -118,8 +119,7 @@ public class UserDbStorage implements UserStorage {
 
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement
-                    ("UPDATE INTO friends (id, user_id, friend_id, friendship)" +
-                                    " VALUES (?, ?, ?, ?);",
+                    ("UPDATE friends SET id = ?, user_id = ?, friend_id = ?, friendship = ?;",
                             Statement.RETURN_GENERATED_KEYS);
             ps.setObject(1, id);
             ps.setObject(2, userId);

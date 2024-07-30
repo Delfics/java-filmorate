@@ -17,7 +17,6 @@ public class UserServiceImpl implements UserService {
     private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
     private final UserStorage userDbStorage;
 
-
     @Autowired
     public UserServiceImpl(UserStorage inMemoryUserStorage) {
         this.userDbStorage = inMemoryUserStorage;
@@ -79,12 +78,12 @@ public class UserServiceImpl implements UserService {
         if (result) {
             log.debug("Успешное удаление пользователя");
         } else {
-            throw new NotFoundException("Не содержит данный пользователя ".concat(id.toString()));
+            throw new NotFoundException("Не содержит данного пользователя ".concat(id.toString()));
         }
     }
 
     @Override
-    public void addFriend(Long userId, Long friendId) {
+    public User addFriend(Long userId, Long friendId) {
         log.info("Начало добавление пользователей в друзья");
 
         User user = userDbStorage.getById(userId);
@@ -92,8 +91,13 @@ public class UserServiceImpl implements UserService {
 
         if (user != null && friend != null) {
             userDbStorage.addFriend(userId, friendId);
+
+            log.info("{} и {} стали друзьями успешно.", user.getName(), friend.getName());
+
+            return user;
+        } else {
+            throw new NotFoundException("Не содержит данного пользователя ".concat(userId.toString()));
         }
-        log.info("{} и {} стали друзьями успешно.", user.getName(), friend.getName());
     }
 
     @Override
@@ -125,7 +129,7 @@ public class UserServiceImpl implements UserService {
         Set<User> result = new HashSet<>();
         userFriends.forEach(user -> {
             result.addAll(otherFriends.stream().filter(otherFriend ->
-                otherFriend.getId().equals(user.getId()))
+                            otherFriend.getId().equals(user.getId()))
                     .collect(Collectors.toSet()));
         });
 
@@ -145,12 +149,13 @@ public class UserServiceImpl implements UserService {
                 .map((numb) -> userDbStorage.getAll().get(Math.toIntExact(numb)))
                 .toList();
 
+
         log.info("Список друзей получен пользователя " + id);
         return friends;
     }
 
     @Override
     public void confirmFriend(Long userId, Long friendId) {
-
+        userDbStorage.confirmFriend(userId, friendId);
     }
 }

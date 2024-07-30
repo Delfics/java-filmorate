@@ -37,7 +37,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void addFriend(Long userId, Long friendId) {
+    public User addFriend(Long userId, Long friendId) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

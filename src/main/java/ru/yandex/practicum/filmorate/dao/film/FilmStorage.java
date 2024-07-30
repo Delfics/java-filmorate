@@ -16,11 +16,19 @@ public interface FilmStorage {
 
     Film getById(Long id);
 
-    boolean deleteById (Long id);
+    boolean deleteById(Long id);
 
-    Mpa getMpa(Long filmMpaId);
+    List<Mpa> getMpa();
 
-    Set<Genre> getGenres(Long filmId);
+    Mpa getMpaByFilmId(Long filmMpaId);
 
-    Set<Long> getLikes (Long filmId);
+    Set<Genre> getGenresById(Long filmId);
+
+    Set<Genre> getGenres();
+
+    Set<Long> getLikes(Long filmId);
+
+    void addLike(Long filmId, Long userId);
+
+    boolean deleteLike(Long filmId, Long userId);
 }

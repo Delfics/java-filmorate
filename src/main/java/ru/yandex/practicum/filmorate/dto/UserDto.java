@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -21,8 +22,7 @@ public class UserDto {
     @NotBlank
     String login;
     String name;
-    @JsonFormat(pattern = "dd-MM-yyyy")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     LocalDate birthday;
     Set<Long> friends = new HashSet<>();
-    Friendship friendship;
 }

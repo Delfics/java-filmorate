@@ -43,9 +43,9 @@ class FilmServiceImplTest {
         film.setDescription("About Test Film");
 
         filmServiceImpl.create(film);
-        filmServiceImpl.remove(film);
+        filmServiceImpl.deleteById(film.getId());
 
-        assertNotEquals(film, inMemoryFilmStorage.getAll().get(film.getId()), "Фильм был удалён");
+        assertNotEquals(film, inMemoryFilmStorage.getAll().get(film), "Фильм был удалён");
     }
 
     @Test
@@ -53,7 +53,7 @@ class FilmServiceImplTest {
         Film film = new Film();
 
         NotFoundException thrown = assertThrows(NotFoundException.class,
-                () -> filmServiceImpl.remove(film), "Не содержит фильм с таким " + film.getId());
+                () -> filmServiceImpl.deleteById(film.getId()), "Не содержит фильм с таким " + film.getId());
 
         assertTrue(thrown.getMessage().contains("Не содержит фильм с таким " + film.getId()));
     }
@@ -75,7 +75,7 @@ class FilmServiceImplTest {
 
         filmServiceImpl.update(film);
 
-        assertEquals(film, inMemoryFilmStorage.getAll().get(film.getId()), "Обновили данные фильма");
+        assertEquals(film, inMemoryFilmStorage.getAll().get(Math.toIntExact(film.getId())), "Обновили данные фильма");
     }
 
     @Test
@@ -202,7 +202,7 @@ class FilmServiceImplTest {
         assertTrue(filmServiceImpl.getById(film.getId()).getLikes().contains(user.getId()),
                 "Содержит лайк данного пользователя");
 
-        filmServiceImpl.removeLike(film.getId(), user.getId());
+        filmServiceImpl.deleteLike(film.getId(), user.getId());
 
         assertFalse(filmServiceImpl.getById(film.getId()).getLikes().contains(user.getId()),
                 "Не содержит лайк данного пользователя");

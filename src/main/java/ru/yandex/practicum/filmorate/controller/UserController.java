@@ -4,12 +4,16 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.dto.UserDto;
+import ru.yandex.practicum.filmorate.dto.mappers.MapUserDtoToUser;
+import ru.yandex.practicum.filmorate.dto.mappers.MapUserToUserDto;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/users")
@@ -22,24 +26,32 @@ public class UserController {
     }
 
     @GetMapping
-    public Collection<User> getAllValues() {
-        return userService.getAllValues();
+    public Collection<UserDto> getAllValues() {
+        Collection<User> allValues = userService.getAllValues();
+        return allValues.stream()
+                .map(MapUserToUserDto::userToUserDto)
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public User getById(@PathVariable Long id) {
-        return userService.getById(id);
+    public UserDto getById(@PathVariable Long id) {
+        User byId = userService.getById(id);
+        return MapUserToUserDto.userToUserDto(byId);
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public User create(@Valid @RequestBody User user) {
-        return userService.create(user);
+    public UserDto create(@Valid @RequestBody UserDto userDto) {
+        User user = MapUserDtoToUser.userDtoToUser(userDto);
+        User createUser = userService.create(user);
+        return MapUserToUserDto.userToUserDto(createUser);
     }
 
     @PutMapping
-    public User update(@Valid @RequestBody User newUser) {
-        return userService.update(newUser);
+    public UserDto update(@Valid @RequestBody UserDto newUserDto) {
+        User user = MapUserDtoToUser.userDtoToUser(newUserDto);
+        User update = userService.update(user);
+        return MapUserToUserDto.userToUserDto(update);
     }
 
     @DeleteMapping("/{id}")
@@ -48,8 +60,9 @@ public class UserController {
     }
 
     @PutMapping("/{userId}/friends/{friendId}")
-    public void addFriend(@PathVariable Long userId, @PathVariable Long friendId) {
-        userService.addFriend(userId, friendId);
+    public UserDto addFriend(@PathVariable Long userId, @PathVariable Long friendId) {
+        User user = userService.addFriend(userId, friendId);
+        return MapUserToUserDto.userToUserDto(user);
     }
 
     @DeleteMapping("/{userId}/friends/{friendId}")
@@ -58,13 +71,19 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/friends")
-    public List<User> getAllFriends(@PathVariable Long userId) {
-        return userService.getAllFriends(userId);
+    public List<UserDto> getAllFriends(@PathVariable Long userId) {
+        List<User> allFriends = userService.getAllFriends(userId);
+        return allFriends.stream()
+                .map(MapUserToUserDto::userToUserDto)
+                .toList();
     }
 
     @GetMapping("/{userId}/friends/common/{otherId}")
-    public Set<User> getCollectiveFriends(@PathVariable Long userId, @PathVariable Long otherId) {
-        return userService.getCollectiveFriends(userId, otherId);
+    public Set<UserDto> getCollectiveFriends(@PathVariable Long userId, @PathVariable Long otherId) {
+        Set<User> collectiveFriends = userService.getCollectiveFriends(userId, otherId);
+        return collectiveFriends.stream()
+                .map(MapUserToUserDto::userToUserDto)
+                .collect(Collectors.toSet());
     }
 
     @PostMapping("/{userId}/friends/{friendId}/confirm")
