@@ -19,7 +19,7 @@ public interface UserService {
 
     void deleteById(Long id);
 
-    List<User> getAllFriends(Long id);
+    Set<User> getAllFriends(Long id);
 
     User addFriend(Long userId, Long friendId);
 

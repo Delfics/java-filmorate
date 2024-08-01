@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.dao.film;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Like;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.enums.Genre;
 
@@ -68,7 +69,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
 
     @Override
-    public Set<Long> getLikes(Long filmId) {
+    public Set<Like> getLikes(Long filmId) {
         return Set.of();
     }
 

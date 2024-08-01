@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.user.UserStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Friend;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.*;
@@ -27,7 +28,7 @@ public class UserServiceImpl implements UserService {
         List<User> allUsers = userDbStorage.getAll();
 
         allUsers.forEach(user -> {
-            List<User> allFriends = getAllFriends(user.getId());
+            Set<User> allFriends = getAllFriends(user.getId());
             user.setFriends(allFriends.stream().map(User::getId).collect(Collectors.toSet()));
         });
 
@@ -38,7 +39,7 @@ public class UserServiceImpl implements UserService {
     public User getById(Long id) {
         User user = userDbStorage.getById(id);
 
-        List<User> allFriends = getAllFriends(user.getId());
+        Set<User> allFriends = getAllFriends(user.getId());
 
         user.setFriends(allFriends.stream().map(User::getId).collect(Collectors.toSet()));
 
@@ -86,15 +87,15 @@ public class UserServiceImpl implements UserService {
     public User addFriend(Long userId, Long friendId) {
         log.info("Начало добавление пользователей в друзья");
 
-        User user = userDbStorage.getById(userId);
-        User friend = userDbStorage.getById(friendId);
+        User user = getById(userId);
+        User friend = getById(friendId);
 
         if (user != null && friend != null) {
-            userDbStorage.addFriend(userId, friendId);
-
+            User user1 = userDbStorage.addFriend(userId, friendId);
+            confirmFriend(userId, friendId);
             log.info("{} и {} стали друзьями успешно.", user.getName(), friend.getName());
 
-            return user;
+            return getById(user1.getId());
         } else {
             throw new NotFoundException("Не содержит данного пользователя ".concat(userId.toString()));
         }
@@ -123,8 +124,8 @@ public class UserServiceImpl implements UserService {
     public Set<User> getCollectiveFriends(Long id, Long otherId) {
         log.info("Начало получение списка общих друзей");
 
-        List<User> userFriends = getAllFriends(id);
-        List<User> otherFriends = getAllFriends(otherId);
+        Set<User> userFriends = getAllFriends(id);
+        Set<User> otherFriends = getAllFriends(otherId);
 
         Set<User> result = new HashSet<>();
         userFriends.forEach(user -> {
@@ -138,20 +139,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> getAllFriends(Long id) {
+    public Set<User> getAllFriends(Long id) {
         log.info("Начало получение списка друзей");
         if (userDbStorage.getById(id) == null) {
             throw new NotFoundException("Пользователь не найден с таким id " + id);
         }
 
         User user = userDbStorage.getById(id);
-        List<User> friends = user.getFriends().stream()
-                .map((numb) -> userDbStorage.getAll().get(Math.toIntExact(numb)))
-                .toList();
+
+        List<Friend> friends = userDbStorage.getFriends(user.getId());
+
+        Set<User> users = friends.stream()
+                .map(friend -> userDbStorage.getById(friend.getFriendId())).collect(Collectors.toSet());
 
 
         log.info("Список друзей получен пользователя " + id);
-        return friends;
+        return users;
     }
 
     @Override

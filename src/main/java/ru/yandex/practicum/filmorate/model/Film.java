@@ -15,11 +15,11 @@ public class Film {
     @NotNull
     String name;
     String description;
-    @JsonFormat(pattern = "dd-MM-yyyy")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     LocalDate releaseDate;
     @NotNull
     Integer duration;
-    Set<Long> likes = new HashSet<>();
+    Set<Like> likes = new HashSet<>();
     Set<Genre> genres = new HashSet<>();
     Mpa mpa;
 

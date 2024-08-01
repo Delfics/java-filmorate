@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import ru.yandex.practicum.filmorate.model.Like;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.enums.Genre;
 
@@ -20,7 +21,7 @@ public class FilmDto {
     LocalDate releaseDate;
     @NotNull
     Integer duration;
-    Set<Long> likes = new HashSet<>();
+    Set<Like> likes = new HashSet<>();
     Set<Genre> genres = new HashSet<>();
     Mpa mpa;
 }

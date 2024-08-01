@@ -1,9 +1,13 @@
 package ru.yandex.practicum.filmorate.dao.user;
 
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.model.Friend;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class InMemoryUserStorage implements UserStorage {
@@ -32,8 +36,8 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public boolean deleteById(Long id) {
-       users.remove(id);
-       return true;
+        users.remove(id);
+        return true;
     }
 
     @Override
@@ -58,5 +62,10 @@ public class InMemoryUserStorage implements UserStorage {
                 .max()
                 .orElse(0);
         return ++currentMaxId;
+    }
+
+    @Override
+    public List<Friend> getFriends(Long userId) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

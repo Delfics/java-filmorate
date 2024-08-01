@@ -72,7 +72,7 @@ public class UserController {
 
     @GetMapping("/{userId}/friends")
     public List<UserDto> getAllFriends(@PathVariable Long userId) {
-        List<User> allFriends = userService.getAllFriends(userId);
+        Set<User> allFriends = userService.getAllFriends(userId);
         return allFriends.stream()
                 .map(MapUserToUserDto::userToUserDto)
                 .toList();

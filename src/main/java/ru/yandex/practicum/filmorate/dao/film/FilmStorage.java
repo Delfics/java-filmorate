@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.dao.film;
 
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Like;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.enums.Genre;
 
@@ -26,7 +27,7 @@ public interface FilmStorage {
 
     Set<Genre> getGenres();
 
-    Set<Long> getLikes(Long filmId);
+    Set<Like> getLikes(Long filmId);
 
     void addLike(Long filmId, Long userId);
 

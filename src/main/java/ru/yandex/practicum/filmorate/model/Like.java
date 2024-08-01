@@ -4,9 +4,9 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class Mpa {
+public class Like {
     @NotNull
     long id;
-    String name;
-    String description;
+    long userId;
+    long filmId;
 }

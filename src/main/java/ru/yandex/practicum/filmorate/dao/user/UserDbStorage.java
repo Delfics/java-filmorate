@@ -7,12 +7,15 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dal.mappers.FriendRowMapper;
 import ru.yandex.practicum.filmorate.dal.mappers.UserRowMapper;
+import ru.yandex.practicum.filmorate.model.Friend;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.enums.Friendship;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Repository
 @Primary
@@ -56,6 +59,12 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User getById(Long id) {
         String query = "SELECT * FROM users WHERE id = ?;";
+        /*List<Friend> friends = getFriends(id);
+        Set<Long> friendId = new HashSet<>();
+        for (Friend f : friends) {
+            friendId.add(f.getFriendId());
+        }
+        user.setFriends(friendId);*/
         return jdbcTemplate.queryForObject(query, userRowMapper, id);
     }
 
@@ -99,7 +108,7 @@ public class UserDbStorage implements UserStorage {
                     "INSERT INTO friends (user_id, friend_id, friendship) VALUES (?, ?, ?);");
             ps.setObject(1, userId);
             ps.setObject(2, friendId);
-            ps.setObject(3, Friendship.NOT_CONFIRMED);
+            ps.setObject(3, Friendship.NOT_CONFIRMED.getValue());
             return ps;
         }, keyHolder);
         return getById(userId);
@@ -114,18 +123,22 @@ public class UserDbStorage implements UserStorage {
     @Override
     public void confirmFriend(Long userId, Long friendId) {
 
-        String query = "SELECT id FROM friedns WHERE user_id = ? AND friend_id = ?;";
-        int id = jdbcTemplate.queryForObject(query, friendRowMapper, userId, friendId);
+        String query = "SELECT * FROM friends WHERE user_id = ? AND friend_id = ?;";
+        Friend friend = jdbcTemplate.queryForObject(query, friendRowMapper, userId, friendId);
 
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement
-                    ("UPDATE friends SET id = ?, user_id = ?, friend_id = ?, friendship = ?;",
-                            Statement.RETURN_GENERATED_KEYS);
-            ps.setObject(1, id);
-            ps.setObject(2, userId);
-            ps.setObject(3, friendId);
-            ps.setObject(4, Friendship.CONFIRMED);
+                    ("UPDATE friends SET friendship = ? WHERE id = ?;");
+            ps.setObject(1, Friendship.CONFIRMED.getValue());
+            ps.setObject(2, friend.getId());
             return ps;
         });
+
+    }
+
+    @Override
+    public List<Friend> getFriends(Long userId) {
+        String query = "SELECT * FROM friends WHERE user_id = ?;";
+        return jdbcTemplate.query(query, friendRowMapper, userId);
     }
 }
