@@ -68,7 +68,7 @@ class FilmServiceImplTest {
         String name = "Дюна";
         String description = "Про червяков";
         DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate release_date = LocalDate.of(1999, 11, 19);
+        LocalDate releaseDate = LocalDate.of(1999, 11, 19);
         int duration = 211;
         long mpaFilmId = 4;
         Set<Genre> genres = new HashSet<>();
@@ -80,7 +80,7 @@ class FilmServiceImplTest {
         Film film = new Film();
         film.setName(name);
         film.setDescription(description);
-        film.setReleaseDate(release_date);
+        film.setReleaseDate(releaseDate);
         film.setDuration(duration);
         film.setMpaId(mpaFilmId);
         film.setGenres(genres);
@@ -94,7 +94,7 @@ class FilmServiceImplTest {
                     assertThat(film1).hasFieldOrPropertyWithValue("id", numb);
                     assertThat(film1).hasFieldOrPropertyWithValue("name", name);
                     assertThat(film1).hasFieldOrPropertyWithValue("description", description);
-                    assertThat(film1).hasFieldOrPropertyWithValue("releaseDate", release_date);
+                    assertThat(film1).hasFieldOrPropertyWithValue("releaseDate", releaseDate);
                     assertThat(film1).hasFieldOrPropertyWithValue("duration", duration);
                     assertThat(film1).hasFieldOrPropertyWithValue("mpaId", mpaFilmId);
                     assertThat(film1).hasFieldOrPropertyWithValue("mpa", mpa);
@@ -111,7 +111,7 @@ class FilmServiceImplTest {
         String name = "Терминатор 2";
         String description = "Про робота киборга";
         DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate release_date = LocalDate.of(1999, 12, 19);
+        LocalDate releaseDate = LocalDate.of(1999, 12, 19);
         int duration = 211;
         long mpaFilmId = 5;
 
@@ -125,14 +125,14 @@ class FilmServiceImplTest {
         film.setId(byId.getId());
         film.setName(name);
         film.setDescription(description);
-        film.setReleaseDate(release_date);
+        film.setReleaseDate(releaseDate);
         film.setDuration(duration);
         film.setMpaId(mpaFilmId);
         film.setGenres(genres);
 
         byId.setName(name);
         byId.setDescription(description);
-        byId.setReleaseDate(release_date);
+        byId.setReleaseDate(releaseDate);
         byId.setDuration(duration);
         byId.setMpaId(mpaFilmId);
         byId.setGenres(genres);
@@ -155,11 +155,11 @@ class FilmServiceImplTest {
         String name = "Терминатор";
         String description = "Про робота";
         DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate release_date = LocalDate.of(1994, 11, 19);
+        LocalDate releaseDate = LocalDate.of(1994, 11, 19);
         int duration = 113;
         long mpaFilmId = 3;
 
-        LocalDate release_dateFormat = LocalDate.parse(release_date.format(format));
+        LocalDate release_dateFormat = LocalDate.parse(releaseDate.format(format));
 
         Mpa mpa = filmServiceImpl.getMpaByFilmId(numb);
         Set<Like> likes = filmServiceImpl.getLikes(numb);
@@ -186,7 +186,7 @@ class FilmServiceImplTest {
         String name = "Звездные Войны";
         String description = "Про инопланетян";
         DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate release_date = LocalDate.of(1990, 11, 19);
+        LocalDate releaseDate = LocalDate.of(1990, 11, 19);
         int duration = 177;
         long mpaFilmId = 4;
         Set<Genre> genres = new HashSet<>();
@@ -198,7 +198,7 @@ class FilmServiceImplTest {
         Film film = new Film();
         film.setName(name);
         film.setDescription(description);
-        film.setReleaseDate(release_date);
+        film.setReleaseDate(releaseDate);
         film.setDuration(duration);
         film.setMpaId(mpaFilmId);
         film.setGenres(genres);
