@@ -23,7 +23,7 @@ public interface FilmStorage {
 
     List<Mpa> getMpa();
 
-    Mpa getMpaById(Long MpaId);
+    Mpa getMpaById(Long mpaId);
 
     Mpa getMpaByFilmId(Long filmMpaId);
 
