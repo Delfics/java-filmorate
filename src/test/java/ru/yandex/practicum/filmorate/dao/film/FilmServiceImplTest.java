@@ -159,7 +159,7 @@ class FilmServiceImplTest {
         int duration = 113;
         long mpaFilmId = 3;
 
-        LocalDate release_dateFormat = LocalDate.parse(releaseDate.format(format));
+        LocalDate releaseDateFormat = LocalDate.parse(releaseDate.format(format));
 
         Mpa mpa = filmServiceImpl.getMpaByFilmId(numb);
         Set<Like> likes = filmServiceImpl.getLikes(numb);
@@ -172,7 +172,7 @@ class FilmServiceImplTest {
                     assertThat(film).hasFieldOrPropertyWithValue("id", numb);
                     assertThat(film).hasFieldOrPropertyWithValue("name", name);
                     assertThat(film).hasFieldOrPropertyWithValue("description", description);
-                    assertThat(film).hasFieldOrPropertyWithValue("releaseDate", release_dateFormat);
+                    assertThat(film).hasFieldOrPropertyWithValue("releaseDate", releaseDateFormat);
                     assertThat(film).hasFieldOrPropertyWithValue("duration", duration);
                     assertThat(film).hasFieldOrPropertyWithValue("likes", likes);
                     assertThat(film).hasFieldOrPropertyWithValue("genres", genres);
