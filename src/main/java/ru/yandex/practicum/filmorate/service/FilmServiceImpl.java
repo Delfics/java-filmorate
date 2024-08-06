@@ -66,7 +66,7 @@ public class FilmServiceImpl implements FilmService {
         log.info("Начало получения списка фильмов, размер - {}", size);
 
         Comparator<Film> comparator = Comparator.comparing((o) -> o.getLikes().size());
-        List<Film> filmsValue = new ArrayList<>(filmStorage.getAll());
+        List<Film> filmsValue = new ArrayList<>(getAllValues());
         if (filmsValue.isEmpty()) {
             throw new NotFoundException("Список фильмов пуст");
         }
@@ -90,9 +90,11 @@ public class FilmServiceImpl implements FilmService {
     public List<Film> getAllValues() {
         List<Film> all = filmStorage.getAll();
         for (Film film : all) {
-            if (film.getMpaId() != 0) {
+            try {
                 Mpa mpa = getMpaByFilmId(film.getId());
                 film.setMpa(mpa);
+            } catch (NotFoundException e) {
+                log.warn(e.getMessage());
             }
             film.setGenres(getGenresByFilmId(film.getId()));
             if (film.getLikes() != null) {
@@ -178,7 +180,7 @@ public class FilmServiceImpl implements FilmService {
     }
 
     @Override
-    public Set<Genre> getGenresByFilmId(Long filmId) {
+    public List<Genre> getGenresByFilmId(Long filmId) {
         return filmStorage.getGenresByFilmId(filmId);
     }
 

@@ -5,7 +5,9 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -19,8 +21,7 @@ public class Film {
     @NotNull
     Integer duration;
     Set<Like> likes = new HashSet<>();
-    Set<Genre> genres = new HashSet<>();
-    long mpaId;
+    List<Genre> genres = new ArrayList<>();
     Mpa mpa;
 
 

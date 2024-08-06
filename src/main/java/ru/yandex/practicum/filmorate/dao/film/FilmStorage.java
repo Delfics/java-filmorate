@@ -31,7 +31,7 @@ public interface FilmStorage {
 
     List<Genre> getGenres();
 
-    Set<Genre> getGenresByFilmId(Long filmId);
+    List<Genre> getGenresByFilmId(Long filmId);
 
     Set<Like> getLikes(Long filmId);
 

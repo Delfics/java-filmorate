@@ -33,7 +33,7 @@ public interface FilmService {
 
     Mpa getMpaByFilmId(Long filmMpaId);
 
-    Set<Genre> getGenresByFilmId(Long filmId);
+    List<Genre> getGenresByFilmId(Long filmId);
 
     List<Genre> getGenres();
 

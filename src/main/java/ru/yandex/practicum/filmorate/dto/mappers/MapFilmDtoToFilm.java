@@ -13,7 +13,6 @@ public class MapFilmDtoToFilm {
         film.setDuration(filmDto.getDuration());
         film.setLikes(filmDto.getLikes());
         film.setGenres(filmDto.getGenres());
-        film.setMpaId(filmDto.getMpaId());
         film.setMpa(filmDto.getMpa());
         return film;
     }
