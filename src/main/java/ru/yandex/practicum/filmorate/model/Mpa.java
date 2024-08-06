@@ -8,5 +8,4 @@ public class Mpa {
     @NotNull
     long id;
     String name;
-    String description;
 }

@@ -15,7 +15,6 @@ import java.util.Set;
 @Data
 public class UserDto {
     Long id;
-    @Email
     @NotNull
     String email;
     @NotNull

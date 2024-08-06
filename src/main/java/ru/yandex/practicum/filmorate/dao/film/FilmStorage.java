@@ -1,9 +1,9 @@
 package ru.yandex.practicum.filmorate.dao.film;
 
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Like;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.enums.Genre;
 
 import java.util.List;
 import java.util.Set;
@@ -21,11 +21,15 @@ public interface FilmStorage {
 
     List<Mpa> getMpa();
 
+    Mpa getMpaById(Long MpaId);
+
     Mpa getMpaByFilmId(Long filmMpaId);
 
-    Set<Genre> getGenresById(Long filmId);
+    Genre getGenreById(Long genreId);
 
-    Set<Genre> getGenres();
+    List<Genre> getGenres();
+
+    Set<Genre> getGenresByFilmId(Long filmId);
 
     Set<Like> getLikes(Long filmId);
 

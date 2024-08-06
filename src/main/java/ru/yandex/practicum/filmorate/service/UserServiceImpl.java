@@ -37,13 +37,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getById(Long id) {
-        User user = userDbStorage.getById(id);
+        try {
+            User user = userDbStorage.getById(id);
 
-        Set<User> allFriends = getAllFriends(user.getId());
+            Set<User> allFriends = getAllFriends(user.getId());
 
-        user.setFriends(allFriends.stream().map(User::getId).collect(Collectors.toSet()));
+            user.setFriends(allFriends.stream().map(User::getId).collect(Collectors.toSet()));
 
-        return user;
+            return user;
+        } catch (RuntimeException e) {
+            throw new NotFoundException(e.getMessage());
+        }
     }
 
     @Override
@@ -105,18 +109,21 @@ public class UserServiceImpl implements UserService {
     public void deleteFriendById(Long userId, Long friendId) {
         log.info("Начало удаление пользователей из друзей");
 
-        User user = userDbStorage.getById(userId);
-        User friend = userDbStorage.getById(friendId);
+        try {
+            User user = userDbStorage.getById(userId);
+            User friend = userDbStorage.getById(friendId);
+            if (user != null && friend != null) {
+                boolean result = userDbStorage.deleteFriend(userId, friendId);
 
-        if (user != null && friend != null) {
-            boolean result = userDbStorage.deleteFriend(userId, friendId);
+                if (result) {
+                    log.info("{} и {} больше не друзья успешно.", user.getName(), friend.getName());
 
-            if (result) {
-                log.info("{} и {} больше не друзья успешно.", user.getName(), friend.getName());
-
+                }
+            } else {
+                throw new NotFoundException("Пользователи " + user.getName() + " или " + friend.getName() + " не найдены");
             }
-        } else {
-            throw new NotFoundException("Пользователи " + user.getName() + " или " + friend.getName() + " не найдены");
+        } catch (RuntimeException e) {
+            throw new NotFoundException(e.getMessage());
         }
     }
 
@@ -141,20 +148,20 @@ public class UserServiceImpl implements UserService {
     @Override
     public Set<User> getAllFriends(Long id) {
         log.info("Начало получение списка друзей");
-        if (userDbStorage.getById(id) == null) {
-            throw new NotFoundException("Пользователь не найден с таким id " + id);
+
+        try {
+            User user = userDbStorage.getById(id);
+
+            List<Friend> friends = userDbStorage.getFriends(user.getId());
+
+            Set<User> users = friends.stream()
+                    .map(friend -> userDbStorage.getById(friend.getFriendId())).collect(Collectors.toSet());
+
+            log.info("Список друзей получен пользователя " + id);
+            return users;
+        } catch (RuntimeException e) {
         }
-
-        User user = userDbStorage.getById(id);
-
-        List<Friend> friends = userDbStorage.getFriends(user.getId());
-
-        Set<User> users = friends.stream()
-                .map(friend -> userDbStorage.getById(friend.getFriendId())).collect(Collectors.toSet());
-
-
-        log.info("Список друзей получен пользователя " + id);
-        return users;
+        throw new NotFoundException("Пользователь не найден с таким id " + id);
     }
 
     @Override

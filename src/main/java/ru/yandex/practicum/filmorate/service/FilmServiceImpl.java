@@ -6,11 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.dao.film.FilmStorage;
 import ru.yandex.practicum.filmorate.dao.user.UserStorage;
-import ru.yandex.practicum.filmorate.model.enums.Genre;
 
 import java.util.*;
 
@@ -37,7 +37,7 @@ public class FilmServiceImpl implements FilmService {
         if (film != null && user != null) {
             filmStorage.addLike(film.getId(), user.getId());
         } else {
-            throwNotFoundIfFilmOrUserNotExist(film.getId(),user.getId());
+            throwNotFoundIfFilmOrUserNotExist(film.getId(), user.getId());
         }
         log.info("Лайк добавлен к фильму с id {} от пользователя с id: {}", film.getId(), user.getId());
     }
@@ -56,7 +56,7 @@ public class FilmServiceImpl implements FilmService {
                 log.info("Лайк удален у фильма с id {} от пользователя с id: {}", film.getId(), user.getId());
             }
         } else {
-            throwNotFoundIfFilmOrUserNotExist(film.getId(),user.getId());
+            throwNotFoundIfFilmOrUserNotExist(film.getId(), user.getId());
         }
     }
 
@@ -87,17 +87,28 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public Collection<Film> getAllValues() {
-        return filmStorage.getAll();
+        List<Film> all = filmStorage.getAll();
+        for (Film film : all) {
+            if (film.getMpa() != null) {
+                film.setMpa(getMpaByFilmId(film.getMpa().getId()));
+            }
+            film.setGenres(getGenresByFilmId(film.getId()));
+            if (film.getLikes() != null) {
+                film.setLikes(filmStorage.getLikes(film.getId()));
+            }
+        }
+        return all;
     }
 
     @Override
     public Film getById(Long id) {
-        Film film = filmStorage.getById(id);
-        if (film == null) {
+        try {
+            return filmStorage.getById(id);
+        } catch (NotFoundException e) {
             throw new NotFoundException("Фильм не найден с таким id " + id);
         }
-        return film;
     }
+
 
     @Override
     public Film create(Film film) {
@@ -145,18 +156,28 @@ public class FilmServiceImpl implements FilmService {
     }
 
     @Override
+    public Mpa getMpaById(Long mpaId) {
+        return filmStorage.getMpaById(mpaId);
+    }
+
+    @Override
     public Mpa getMpaByFilmId(Long filmMpaId) {
         return filmStorage.getMpaByFilmId(filmMpaId);
     }
 
     @Override
-    public Set<Genre> getGenres() {
+    public List<Genre> getGenres() {
         return filmStorage.getGenres();
     }
 
     @Override
-    public Set<Genre> getGenresById (Long filmId) {
-       return filmStorage.getGenresById(filmId);
+    public Genre getGenreById(Long genreId) {
+        return filmStorage.getGenreById(genreId);
+    }
+
+    @Override
+    public Set<Genre> getGenresByFilmId(Long filmId) {
+        return filmStorage.getGenresByFilmId(filmId);
     }
 
     private void throwNotFoundIfFilmOrUserNotExist(Long filmId, Long userId) {

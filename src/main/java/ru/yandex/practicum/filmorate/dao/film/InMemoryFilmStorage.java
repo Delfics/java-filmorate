@@ -1,10 +1,11 @@
+/*
 package ru.yandex.practicum.filmorate.dao.film;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Like;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.enums.Genre;
 
 import java.util.HashMap;
 import java.util.List;
@@ -49,7 +50,12 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public List<Mpa> getMpa() {
-        return List.of();
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Mpa getMpaById(Long MpaId) {
+        return null;
     }
 
     @Override
@@ -58,12 +64,17 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Set<Genre> getGenresById(Long filmId) {
-        return Set.of();
+    public Genre getGenreById(Long filmId) {
+        return null;
     }
 
     @Override
-    public Set<Genre> getGenres() {
+    public List<Genre> getGenres() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Set<Genre> getGenresByFilmId(Long filmId) {
         return Set.of();
     }
 
@@ -98,3 +109,4 @@ public class InMemoryFilmStorage implements FilmStorage {
         return ++currentMaxId;
     }
 }
+*/

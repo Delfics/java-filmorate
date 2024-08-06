@@ -1,8 +1,8 @@
 package ru.yandex.practicum.filmorate.service;
 
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.enums.Genre;
 
 import java.util.Collection;
 import java.util.List;
@@ -27,9 +27,13 @@ public interface FilmService {
 
     List<Mpa> getMpa();
 
+    Mpa getMpaById(Long mpaId);
+
     Mpa getMpaByFilmId(Long filmMpaId);
 
-    Set<Genre> getGenresById(Long filmId);
+    Set<Genre> getGenresByFilmId(Long filmId);
 
-    Set<Genre> getGenres();
+    List<Genre> getGenres();
+
+    Genre getGenreById(Long genreId);
 }

@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import ru.yandex.practicum.filmorate.model.enums.Genre;
+
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -21,6 +21,7 @@ public class Film {
     Integer duration;
     Set<Like> likes = new HashSet<>();
     Set<Genre> genres = new HashSet<>();
+    long mpaId;
     Mpa mpa;
 
 

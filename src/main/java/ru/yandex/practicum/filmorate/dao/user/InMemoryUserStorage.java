@@ -1,3 +1,4 @@
+/*
 package ru.yandex.practicum.filmorate.dao.user;
 
 import org.springframework.stereotype.Component;
@@ -69,3 +70,4 @@ public class InMemoryUserStorage implements UserStorage {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }
+*/

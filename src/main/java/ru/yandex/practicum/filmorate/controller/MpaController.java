@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/mpa")
@@ -25,6 +26,6 @@ public class MpaController {
 
     @GetMapping("/{id}")
     public Mpa getMpaById(@PathVariable Long id) {
-        return filmService.getMpaByFilmId(id);
+        return filmService.getMpaById(id);
     }
 }
