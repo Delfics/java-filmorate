@@ -2,9 +2,9 @@ package ru.yandex.practicum.filmorate.service;
 
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Like;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -13,9 +13,11 @@ public interface FilmService {
 
     void deleteLike(Long filmId, Long userId);
 
+    Set<Like> getLikes(Long filmId);
+
     List<Film> getPopularFilms(Long size);
 
-    Collection<Film> getAllValues();
+    List<Film> getAllValues();
 
     Film create(Film film);
 

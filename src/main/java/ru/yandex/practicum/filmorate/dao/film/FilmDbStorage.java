@@ -36,17 +36,7 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public List<Film> getAll() {
         String query = "SELECT * FROM film";
-        List<Film> films = jdbcTemplate.query(query, filmRowMapper);
-        for (Film film : films) {
-            if (film.getMpa() != null) {
-                film.setMpa(getMpaByFilmId(film.getMpa().getId()));
-            }
-            film.setGenres(getGenresByFilmId(film.getId()));
-            if (film.getLikes() != null) {
-                film.setLikes(getLikes(film.getId()));
-            }
-        }
-        return films;
+        return jdbcTemplate.query(query, filmRowMapper);
     }
 
     @Override
@@ -168,7 +158,7 @@ public class FilmDbStorage implements FilmStorage {
             }
             return film;
         } catch (EmptyResultDataAccessException e) {
-            throw new  NotFoundException ("Фильм с таким id не найден");
+            throw new NotFoundException("Фильм с таким id не найден");
         }
     }
 
@@ -206,7 +196,7 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public List<Genre> getGenres() {
         String query = "SELECT * FROM genres;";
-        return  jdbcTemplate.query(query, genreRowMapper);
+        return jdbcTemplate.query(query, genreRowMapper);
     }
 
     @Override
@@ -242,7 +232,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     public boolean deleteGenresForFilm(Long filmId) {
-     return jdbcTemplate.update("DELETE FROM film_genres WHERE film_id = ?;", filmId) > 0;
+        return jdbcTemplate.update("DELETE FROM film_genres WHERE film_id = ?;", filmId) > 0;
     }
 
     @Override

@@ -8,12 +8,12 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/genres")
 public class GenresController {
     private final FilmService filmService;
+
     public GenresController(FilmService filmService) {
         this.filmService = filmService;
     }

@@ -8,7 +8,6 @@ import ru.yandex.practicum.filmorate.dto.mappers.MapFilmToFilmDto;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
-import java.util.Collection;
 import java.util.List;
 
 @RestController
@@ -21,8 +20,8 @@ public class FilmController {
     }
 
     @GetMapping
-    public Collection<FilmDto> getAll() {
-        Collection<Film> allValues = filmService.getAllValues();
+    public List<FilmDto> getAll() {
+        List<Film> allValues = filmService.getAllValues();
         return allValues.stream()
                 .map(MapFilmToFilmDto::filmToFilmDto)
                 .toList();
@@ -37,7 +36,7 @@ public class FilmController {
     @GetMapping("/popular{count}")
     public List<FilmDto> getPopularFilms(@PathVariable @RequestParam(defaultValue = "10") Long count) {
         List<Film> popularFilms = filmService.getPopularFilms(count);
-       return popularFilms.stream()
+        return popularFilms.stream()
                 .map(MapFilmToFilmDto::filmToFilmDto)
                 .toList();
     }
@@ -46,14 +45,14 @@ public class FilmController {
     public FilmDto create(@Valid @RequestBody FilmDto filmDto) {
         Film film = MapFilmDtoToFilm.filmDtoToFilm(filmDto);
         Film film1 = filmService.create(film);
-       return MapFilmToFilmDto.filmToFilmDto(film1);
+        return MapFilmToFilmDto.filmToFilmDto(film1);
     }
 
     @PutMapping
     public FilmDto update(@Valid @RequestBody FilmDto newFilmDto) {
         Film film = MapFilmDtoToFilm.filmDtoToFilm(newFilmDto);
         Film update = filmService.update(film);
-       return MapFilmToFilmDto.filmToFilmDto(update);
+        return MapFilmToFilmDto.filmToFilmDto(update);
     }
 
     @PutMapping("{id}/like/{userId}")

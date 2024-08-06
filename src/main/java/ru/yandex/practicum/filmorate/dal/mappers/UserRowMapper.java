@@ -18,10 +18,8 @@ public class UserRowMapper implements RowMapper<User> {
         user.setEmail(rs.getString("email"));
         user.setLogin(rs.getString("login"));
         user.setName(rs.getString("name"));
-
         String birthday = rs.getString("birthday");
         user.setBirthday(LocalDate.parse(birthday));
-
         return user;
     }
 }

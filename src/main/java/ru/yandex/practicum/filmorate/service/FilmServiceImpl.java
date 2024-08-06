@@ -4,13 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.dao.film.FilmStorage;
 import ru.yandex.practicum.filmorate.dao.user.UserStorage;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.dao.film.FilmStorage;
 
 import java.util.*;
 
@@ -18,12 +15,17 @@ import java.util.*;
 public class FilmServiceImpl implements FilmService {
     private static final Logger log = LoggerFactory.getLogger(FilmServiceImpl.class);
     private final FilmStorage filmStorage;
-    private final UserStorage userStorage;
+    private final UserService userService;
 
     @Autowired
-    public FilmServiceImpl(FilmStorage filmStorage, UserStorage userStorage) {
+    public FilmServiceImpl(FilmStorage filmStorage, UserService userService) {
         this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
+        this.userService = userService;
+    }
+
+    @Override
+    public Set<Like> getLikes(Long filmId) {
+        return filmStorage.getLikes(filmId);
     }
 
     @Override
@@ -33,7 +35,7 @@ public class FilmServiceImpl implements FilmService {
         throwNotFoundIfFilmOrUserNotExist(filmId, userId);
 
         Film film = filmStorage.getById(filmId);
-        User user = userStorage.getById(userId);
+        User user = userService.getById(userId);
         if (film != null && user != null) {
             filmStorage.addLike(film.getId(), user.getId());
         } else {
@@ -49,7 +51,7 @@ public class FilmServiceImpl implements FilmService {
         throwNotFoundIfFilmOrUserNotExist(filmId, userId);
 
         Film film = filmStorage.getById(filmId);
-        User user = userStorage.getById(userId);
+        User user = userService.getById(userId);
         if (film != null && user != null) {
             boolean result = filmStorage.deleteLike(film.getId(), user.getId());
             if (result) {
@@ -86,11 +88,12 @@ public class FilmServiceImpl implements FilmService {
     }
 
     @Override
-    public Collection<Film> getAllValues() {
+    public List<Film> getAllValues() {
         List<Film> all = filmStorage.getAll();
         for (Film film : all) {
-            if (film.getMpa() != null) {
-                film.setMpa(getMpaByFilmId(film.getMpa().getId()));
+            if (film.getMpaId() != 0) {
+                Mpa mpa = getMpaByFilmId(film.getId());
+                film.setMpa(mpa);
             }
             film.setGenres(getGenresByFilmId(film.getId()));
             if (film.getLikes() != null) {
@@ -115,7 +118,7 @@ public class FilmServiceImpl implements FilmService {
         log.info("Начало создания film - {}", film.getName());
 
         ValidateFilm.validate(film);
-        /*film.setId(inMemoryFilmStorage.getNextId());*/
+
         Film film1 = filmStorage.create(film);
         if (filmStorage.getAll().contains(film)) {
             log.debug("Успешно создался film с id - {}", film.getId());
@@ -181,9 +184,9 @@ public class FilmServiceImpl implements FilmService {
     }
 
     private void throwNotFoundIfFilmOrUserNotExist(Long filmId, Long userId) {
-        if (!userStorage.getAll().contains(userStorage.getById(userId))) {
+        if (!userService.getAllValues().contains(userService.getById(userId))) {
             throw new NotFoundException("Пользователь с таким id: " + userId + " не найден");
-        } else if (!filmStorage.getAll().contains(filmStorage.getById(filmId))) {
+        } else if (!getAllValues().contains(filmStorage.getById(filmId))) {
             throw new NotFoundException("Фильм с таким id: " + filmId + " не найден");
         }
     }

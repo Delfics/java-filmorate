@@ -1,10 +1,13 @@
 package ru.yandex.practicum.filmorate.dao.user;
 
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Friend;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.List;
+import java.util.Set;
 
+@Repository
 public interface UserStorage {
     List<User> getAll();
 
@@ -20,7 +23,7 @@ public interface UserStorage {
 
     boolean deleteFriend(Long userId, Long friendId);
 
-    void confirmFriend(Long userId, Long friendId);
+    Friend confirmFriend(Long userId, Long friendId);
 
-    List<Friend> getFriends(Long userId);
+    Set<Friend> getFriends(Long userId);
 }

@@ -16,6 +16,7 @@ import java.sql.Statement;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Repository
 @Primary
@@ -59,7 +60,13 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User getById(Long id) {
         String query = "SELECT * FROM users WHERE id = ?;";
-        return jdbcTemplate.queryForObject(query, userRowMapper, id);
+        User user = jdbcTemplate.queryForObject(query, userRowMapper, id);
+        Set<Friend> friends = getFriends(id);
+        Set<Long> friendsIds = friends.stream()
+                .map(Friend::getFriendId)
+                .collect(Collectors.toSet());
+        user.setFriends(friendsIds);
+        return user;
     }
 
     @Override
@@ -115,7 +122,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public void confirmFriend(Long userId, Long friendId) {
+    public Friend confirmFriend(Long userId, Long friendId) {
 
         String query = "SELECT * FROM friends WHERE user_id = ? AND friend_id = ?;";
         Friend friend = jdbcTemplate.queryForObject(query, friendRowMapper, userId, friendId);
@@ -127,12 +134,15 @@ public class UserDbStorage implements UserStorage {
             ps.setObject(2, friend.getId());
             return ps;
         });
+        return jdbcTemplate.queryForObject(query, friendRowMapper, userId, friendId);
+
 
     }
 
     @Override
-    public List<Friend> getFriends(Long userId) {
+    public Set<Friend> getFriends(Long userId) {
         String query = "SELECT * FROM friends WHERE user_id = ?;";
-        return jdbcTemplate.query(query, friendRowMapper, userId);
+        List<Friend> query1 = jdbcTemplate.query(query, friendRowMapper, userId);
+        return new HashSet<>(query1);
     }
 }

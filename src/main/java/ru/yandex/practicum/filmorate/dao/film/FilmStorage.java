@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.dao.film;
 
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Like;
@@ -8,6 +9,7 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import java.util.List;
 import java.util.Set;
 
+@Repository
 public interface FilmStorage {
     List<Film> getAll();
 

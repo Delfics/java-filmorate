@@ -9,9 +9,11 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.yandex.practicum.filmorate.dal.mappers.*;
 import ru.yandex.practicum.filmorate.dao.user.UserDbStorage;
-import ru.yandex.practicum.filmorate.dao.user.UserStorage;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.model.enums.Genres;
+import ru.yandex.practicum.filmorate.service.FilmServiceImpl;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.service.UserServiceImpl;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -23,14 +25,14 @@ import static org.junit.jupiter.api.Assertions.*;
 @JdbcTest
 @ExtendWith(SpringExtension.class)
 @AutoConfigureTestDatabase
-@Import({FilmDbStorage.class, FilmRowMapper.class,
+@Import({FilmServiceImpl.class, FilmDbStorage.class, FilmRowMapper.class,
         MpaRowMapper.class, GenreRowMapper.class, LikesRowMapper.class,
-        UserDbStorage.class, UserRowMapper.class, FriendRowMapper.class})
-class FilmDbStorageTest {
+        UserServiceImpl.class, UserDbStorage.class, UserRowMapper.class, FriendRowMapper.class})
+class FilmServiceImplTest {
     @Autowired
-    private FilmStorage filmDbStorage;
+    private FilmServiceImpl filmServiceImpl;
     @Autowired
-    private UserStorage userDbStorage;
+    private UserServiceImpl userServiceImpl;
 
     @Test
     void getAll() {
@@ -42,8 +44,10 @@ class FilmDbStorageTest {
         film.setReleaseDate(LocalDate.of(1994,11,19));
         film.setDuration(113);
         film.setMpaId(3);
+        Mpa mpaByFilmId = filmServiceImpl.getMpaByFilmId(film.getId());
+        film.setMpa(mpaByFilmId);
 
-        Genre genreById = filmDbStorage.getGenreById(6L);
+        Genre genreById = filmServiceImpl.getGenreById(6L);
 
         Set<Genre> genres = new HashSet<>();
         genres.add(genreById);
@@ -52,7 +56,7 @@ class FilmDbStorageTest {
 
         filmsLocal.add(film);
 
-        List<Film> filmsGot = filmDbStorage.getAll();
+        List<Film> filmsGot = filmServiceImpl.getAllValues();
 
         assertEquals(filmsLocal, filmsGot, "Содержит идентичные списки фильмов");
 
@@ -83,8 +87,8 @@ class FilmDbStorageTest {
         film.setGenres(genres);
 
 
-        Optional<Film> filmOptional = Optional.ofNullable(filmDbStorage.create(film));
-        Mpa mpa = filmDbStorage.getMpaByFilmId(film.getId());
+        Optional<Film> filmOptional = Optional.ofNullable(filmServiceImpl.create(film));
+        Mpa mpa = filmServiceImpl.getMpaByFilmId(film.getId());
 
         assertThat(filmOptional).isPresent()
                 .hasValueSatisfying(film1 -> {
@@ -103,7 +107,7 @@ class FilmDbStorageTest {
     @Test
     void update() {
         long filmId = 1;
-        Film byId = filmDbStorage.getById(filmId);
+        Film byId = filmServiceImpl.getById(filmId);
 
         String name = "Терминатор 2";
         String description = "Про робота киборга";
@@ -134,13 +138,13 @@ class FilmDbStorageTest {
         byId.setMpaId(mpaFilmId);
         byId.setGenres(genres);
 
-        filmDbStorage.update(byId);
+        filmServiceImpl.update(byId);
 
-        byId.setMpa(filmDbStorage.getMpaByFilmId(byId.getId()));
-        film.setMpa(filmDbStorage.getMpaByFilmId(film.getId()));
+        byId.setMpa(filmServiceImpl.getMpaByFilmId(byId.getId()));
+        film.setMpa(filmServiceImpl.getMpaByFilmId(film.getId()));
 
 
-        Film byId1 = filmDbStorage.getById(byId.getId());
+        Film byId1 = filmServiceImpl.getById(byId.getId());
 
         assertEquals(film, byId1, "Фильм обновлён");
 
@@ -158,11 +162,11 @@ class FilmDbStorageTest {
 
         LocalDate release_dateFormat = LocalDate.parse(release_date.format(format));
 
-        Mpa mpa = filmDbStorage.getMpaByFilmId(numb);
-        Set<Like> likes = filmDbStorage.getLikes(numb);
-        Set<Genre> genres = filmDbStorage.getGenresByFilmId(numb);
+        Mpa mpa = filmServiceImpl.getMpaByFilmId(numb);
+        Set<Like> likes = filmServiceImpl.getLikes(numb);
+        Set<Genre> genres = filmServiceImpl.getGenresByFilmId(numb);
 
-        Optional<Film> filmOptional = Optional.ofNullable(filmDbStorage.getById(numb));
+        Optional<Film> filmOptional = Optional.ofNullable(filmServiceImpl.getById(numb));
 
         assertThat(filmOptional).isPresent()
                 .hasValueSatisfying(film -> {
@@ -201,11 +205,11 @@ class FilmDbStorageTest {
         film.setGenres(genres);
 
 
-        Optional<Film> filmOptional = Optional.ofNullable(filmDbStorage.create(film));
+        Optional<Film> filmOptional = Optional.ofNullable(filmServiceImpl.create(film));
 
-        filmDbStorage.deleteById(filmOptional.get().getId());
+        filmServiceImpl.deleteById(filmOptional.get().getId());
 
-        List<Film> all = filmDbStorage.getAll();
+        List<Film> all = filmServiceImpl.getAllValues();
         boolean contains = all.contains(filmOptional.get());
 
         assertFalse(contains, "Фильма не существует");
@@ -241,7 +245,7 @@ class FilmDbStorageTest {
         localMpa.add(mpa4);
         localMpa.add(mpa5);
 
-        List<Mpa> mpa = filmDbStorage.getMpa();
+        List<Mpa> mpa = filmServiceImpl.getMpa();
 
         assertEquals(localMpa, mpa, "Рейтинг возрастов идентичен");
     }
@@ -257,7 +261,7 @@ class FilmDbStorageTest {
         mpa.setName(name);
 
 
-        Mpa mpaById = filmDbStorage.getMpaByFilmId(id);
+        Mpa mpaById = filmServiceImpl.getMpaByFilmId(id);
 
         assertEquals(mpa, mpaById, "Mpa равны друг другу");
     }
@@ -297,7 +301,7 @@ class FilmDbStorageTest {
         genresLocal.add(genre6);
 
 
-        List<Genre> genres = filmDbStorage.getGenres();
+        List<Genre> genres = filmServiceImpl.getGenres();
 
         assertEquals(genresLocal, genres, "Жанры идентичны");
     }
@@ -309,7 +313,7 @@ class FilmDbStorageTest {
         genre1.setName(Genres.Боевик);
 
 
-        Genre genreById = filmDbStorage.getGenreById(genre1.getId());
+        Genre genreById = filmServiceImpl.getGenreById(genre1.getId());
 
         assertEquals(genre1, genreById, "Жанры идентичены");
 
@@ -330,15 +334,15 @@ class FilmDbStorageTest {
         likesLocal.add(like);
 
 
-        User userById = userDbStorage.getById(userId);
-        Film filmById = filmDbStorage.getById(filmId);
+        User userById = userServiceImpl.getById(userId);
+        Film filmById = filmServiceImpl.getById(filmId);
 
-        filmDbStorage.addLike(filmById.getId(), userById.getId());
-        Set<Like> likesByFilm = filmDbStorage.getLikes(filmById.getId());
+        filmServiceImpl.addLike(filmById.getId(), userById.getId());
+        Set<Like> likesByFilm = filmServiceImpl.getLikes(filmById.getId());
 
         assertEquals(likesLocal, likesByFilm, "Содержит лайк от пользователя");
 
-        Set<Like> likesGetAll = filmDbStorage.getLikes(filmById.getId());
+        Set<Like> likesGetAll = filmServiceImpl.getLikes(filmById.getId());
 
         assertEquals(likesLocal, likesGetAll, "Содержит все лайки");
     }
@@ -357,11 +361,11 @@ class FilmDbStorageTest {
         likes.add(like);
 
 
-        User userById = userDbStorage.getById(userId);
-        Film filmById = filmDbStorage.getById(filmId);
+        User userById = userServiceImpl.getById(userId);
+        Film filmById = filmServiceImpl.getById(filmId);
 
-        filmDbStorage.addLike(filmById.getId(), userById.getId());
-        Set<Like> likesByFilm = filmDbStorage.getLikes(filmById.getId());
+        filmServiceImpl.addLike(filmById.getId(), userById.getId());
+        Set<Like> likesByFilm = filmServiceImpl.getLikes(filmById.getId());
 
         assertEquals(likes, likesByFilm, "Содержит лайк от пользователя");
     }
@@ -379,16 +383,16 @@ class FilmDbStorageTest {
 
         likes.add(like);
 
-        User userById = userDbStorage.getById(userId);
-        Film filmById = filmDbStorage.getById(filmId);
+        User userById = userServiceImpl.getById(userId);
+        Film filmById = filmServiceImpl.getById(filmId);
 
-        filmDbStorage.addLike(filmById.getId(), userById.getId());
-        Set<Like> likesByFilm = filmDbStorage.getLikes(filmById.getId());
+        filmServiceImpl.addLike(filmById.getId(), userById.getId());
+        Set<Like> likesByFilm = filmServiceImpl.getLikes(filmById.getId());
 
         assertEquals(likes, likesByFilm, "Содержит лайк от пользователя");
 
-        filmDbStorage.deleteLike(filmById.getId(), userById.getId());
-        Set<Like> likesMustEmpty = filmDbStorage.getLikes(filmById.getId());
+        filmServiceImpl.deleteLike(filmById.getId(), userById.getId());
+        Set<Like> likesMustEmpty = filmServiceImpl.getLikes(filmById.getId());
 
         assertNotEquals(likes, likesMustEmpty, "Не содержит лайк от пользователя");
     }

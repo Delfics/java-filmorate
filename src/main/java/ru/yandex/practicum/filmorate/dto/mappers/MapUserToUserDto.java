@@ -4,7 +4,7 @@ import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.model.User;
 
 public class MapUserToUserDto {
-    public static  UserDto userToUserDto(User user) {
+    public static UserDto userToUserDto(User user) {
         UserDto userDto = new UserDto();
         userDto.setId(user.getId());
         userDto.setName(user.getName());

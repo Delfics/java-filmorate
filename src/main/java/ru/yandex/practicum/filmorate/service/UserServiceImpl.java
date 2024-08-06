@@ -24,11 +24,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Collection<User> getAllValues() {
+    public List<User> getAllValues() {
         List<User> allUsers = userDbStorage.getAll();
 
         allUsers.forEach(user -> {
-            Set<User> allFriends = getAllFriends(user.getId());
+            Set<User> allFriends = getFriends(user.getId());
             user.setFriends(allFriends.stream().map(User::getId).collect(Collectors.toSet()));
         });
 
@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService {
         try {
             User user = userDbStorage.getById(id);
 
-            Set<User> allFriends = getAllFriends(user.getId());
+            Set<User> allFriends = getFriends(user.getId());
 
             user.setFriends(allFriends.stream().map(User::getId).collect(Collectors.toSet()));
 
@@ -96,7 +96,6 @@ public class UserServiceImpl implements UserService {
 
         if (user != null && friend != null) {
             User user1 = userDbStorage.addFriend(userId, friendId);
-            confirmFriend(userId, friendId);
             log.info("{} и {} стали друзьями успешно.", user.getName(), friend.getName());
 
             return getById(user1.getId());
@@ -120,7 +119,8 @@ public class UserServiceImpl implements UserService {
 
                 }
             } else {
-                throw new NotFoundException("Пользователи " + user.getName() + " или " + friend.getName() + " не найдены");
+                throw new NotFoundException("Пользователи " + user.getName() + " или " + friend.getName() +
+                        " не найдены");
             }
         } catch (RuntimeException e) {
             throw new NotFoundException(e.getMessage());
@@ -131,8 +131,8 @@ public class UserServiceImpl implements UserService {
     public Set<User> getCollectiveFriends(Long id, Long otherId) {
         log.info("Начало получение списка общих друзей");
 
-        Set<User> userFriends = getAllFriends(id);
-        Set<User> otherFriends = getAllFriends(otherId);
+        Set<User> userFriends = getFriends(id);
+        Set<User> otherFriends = getFriends(otherId);
 
         Set<User> result = new HashSet<>();
         userFriends.forEach(user -> {
@@ -146,13 +146,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Set<User> getAllFriends(Long id) {
+    public Set<User> getFriends(Long id) {
         log.info("Начало получение списка друзей");
 
         try {
             User user = userDbStorage.getById(id);
 
-            List<Friend> friends = userDbStorage.getFriends(user.getId());
+            Set<Friend> friends = userDbStorage.getFriends(user.getId());
 
             Set<User> users = friends.stream()
                     .map(friend -> userDbStorage.getById(friend.getFriendId())).collect(Collectors.toSet());
@@ -160,12 +160,12 @@ public class UserServiceImpl implements UserService {
             log.info("Список друзей получен пользователя " + id);
             return users;
         } catch (RuntimeException e) {
+            throw new NotFoundException("Пользователь не найден с таким id " + id);
         }
-        throw new NotFoundException("Пользователь не найден с таким id " + id);
     }
 
     @Override
-    public void confirmFriend(Long userId, Long friendId) {
-        userDbStorage.confirmFriend(userId, friendId);
+    public Friend confirmFriend(Long userId, Long friendId) {
+        return userDbStorage.confirmFriend(userId, friendId);
     }
 }

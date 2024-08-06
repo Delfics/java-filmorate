@@ -9,12 +9,12 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/mpa")
 public class MpaController {
     private final FilmService filmService;
+
     public MpaController(FilmService filmService) {
         this.filmService = filmService;
     }

@@ -12,11 +12,10 @@ import ru.yandex.practicum.filmorate.dal.mappers.UserRowMapper;
 import ru.yandex.practicum.filmorate.model.Friend;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.enums.Friendship;
+import ru.yandex.practicum.filmorate.service.UserServiceImpl;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,13 +24,26 @@ import static org.junit.jupiter.api.Assertions.*;
 @JdbcTest
 @ExtendWith(SpringExtension.class)
 @AutoConfigureTestDatabase
-@Import({UserDbStorage.class, UserRowMapper.class, FriendRowMapper.class})
-class UserDbStorageTest {
+@Import({UserServiceImpl.class, UserDbStorage.class,
+        UserRowMapper.class, FriendRowMapper.class})
+class UserServiceImplTest {
     @Autowired
-    private UserStorage userDbStorage;
+    private UserServiceImpl userServiceImpl;
 
     @Test
     void getAll() {
+        long id1 = 1;
+        long id2 = 2;
+        List<User> values = new ArrayList<>();
+
+        User byId = userServiceImpl.getById(id1);
+        User byId1 = userServiceImpl.getById(id2);
+        values.add(byId);
+        values.add(byId1);
+
+        List<User> allValues = userServiceImpl.getAllValues();
+
+        assertEquals(values, allValues, "Списки идентичны");
     }
 
     @Test
@@ -48,7 +60,7 @@ class UserDbStorageTest {
         userLocal.setLogin(login);
         userLocal.setBirthday(localDate);
 
-        Optional<User> createdUser = Optional.ofNullable(userDbStorage.create(userLocal));
+        Optional<User> createdUser = Optional.ofNullable(userServiceImpl.create(userLocal));
 
         assertThat(createdUser).isPresent()
                 .hasValueSatisfying(user -> {
@@ -75,7 +87,7 @@ class UserDbStorageTest {
         userLocal.setLogin(login);
         userLocal.setBirthday(localDate);
 
-        User byId = userDbStorage.getById(id);
+        User byId = userServiceImpl.getById(id);
 
         assertEquals(userLocal, byId, "Пользователь соответсвует");
     }
@@ -96,14 +108,17 @@ class UserDbStorageTest {
         userLocal.setLogin(login);
         userLocal.setBirthday(localDate);
 
-        User byId1 = userDbStorage.getById(id);
-        User byId2 = userDbStorage.getById(anotherId);
+        User byId1 = userServiceImpl.getById(id);
+        User byId2 = userServiceImpl.getById(anotherId);
 
-        userDbStorage.addFriend(userLocal.getId(), byId2.getId());
-        userDbStorage.confirmFriend(userLocal.getId(), byId2.getId());
+        userServiceImpl.addFriend(userLocal.getId(), byId2.getId());
+        userServiceImpl.confirmFriend(userLocal.getId(), byId2.getId());
 
-        byId1 = userDbStorage.getById(id);
+        userServiceImpl.update(userLocal);
 
+        User byId1Updated = userServiceImpl.getById(id);
+
+        assertNotEquals(userLocal, byId1Updated, "Пользователь обновлён");
     }
 
     @Test
@@ -119,10 +134,10 @@ class UserDbStorageTest {
         userLocal.setLogin(login);
         userLocal.setBirthday(localDate);
 
-        User user = userDbStorage.create(userLocal);
-        userDbStorage.deleteById(user.getId());
+        User user = userServiceImpl.create(userLocal);
+        userServiceImpl.deleteById(user.getId());
 
-        List<User> all = userDbStorage.getAll();
+        List<User> all = userServiceImpl.getAllValues();
         boolean contains = all.contains(user);
 
         assertFalse(contains, "Пользователя больше не существует");
@@ -130,24 +145,23 @@ class UserDbStorageTest {
 
     @Test
     void addFriend() {
-        long friendSeq = 2;
         long userId1 = 1;
         long userId2 = 2;
-        User byId1 = userDbStorage.getById(userId1);
-        User byId2 = userDbStorage.getById(userId2);
+        User byId1 = userServiceImpl.getById(userId1);
+        User byId2 = userServiceImpl.getById(userId2);
 
-        List<Friend> friendsLocal = new ArrayList<>();
-        Friend friend = new Friend();
-        friend.setId(friendSeq);
-        friend.setUserId(byId1.getId());
-        friend.setFriendId(byId2.getId());
-        friend.setFriendship(Friendship.CONFIRMED);
+        Set<User> friendsLocal = new HashSet<>();
+        User userLocal = new User();
+        userLocal.setId(byId2.getId());
+        userLocal.setName(byId2.getName());
+        userLocal.setLogin(byId2.getLogin());
+        userLocal.setBirthday(byId2.getBirthday());
+        userLocal.setEmail(byId2.getEmail());
+        friendsLocal.add(userLocal);
 
-        friendsLocal.add(friend);
-
-        userDbStorage.addFriend(byId1.getId(), byId2.getId());
-        userDbStorage.confirmFriend(byId1.getId(), byId2.getId());
-        List<Friend> friends = userDbStorage.getFriends(byId1.getId());
+        userServiceImpl.addFriend(byId1.getId(), byId2.getId());
+        userServiceImpl.confirmFriend(byId1.getId(), byId2.getId());
+        Set<User> friends = userServiceImpl.getFriends(byId1.getId());
 
         assertEquals(friendsLocal, friends, "Список друзей идентичен");
     }
@@ -158,9 +172,9 @@ class UserDbStorageTest {
         long friendSeq = 1;
         long userId1 = 1;
         long userId2 = 2;
-        User byId1 = userDbStorage.getById(userId1);
-        User byId2 = userDbStorage.getById(userId2);
-        userDbStorage.addFriend(byId1.getId(), byId2.getId());
+        User byId1 = userServiceImpl.getById(userId1);
+        User byId2 = userServiceImpl.getById(userId2);
+        userServiceImpl.addFriend(byId1.getId(), byId2.getId());
 
         List<Friend> friendsLocal = new ArrayList<>();
         Friend friend = new Friend();
@@ -169,12 +183,8 @@ class UserDbStorageTest {
         friend.setFriendId(byId2.getId());
         friend.setFriendship(Friendship.CONFIRMED);
 
-        friendsLocal.add(friend);
-
-        List<Friend> friends = userDbStorage.getFriends(byId1.getId());
-
-        userDbStorage.deleteFriend(byId1.getId(), byId2.getId());
-        List<Friend> friends1 = userDbStorage.getFriends(byId1.getId());
+        userServiceImpl.deleteFriendById(byId1.getId(), byId2.getId());
+        Set<User> friends1 = userServiceImpl.getFriends(byId1.getId());
 
         assertNotEquals(friendsLocal, friends1, "В Списках друзей больше не содержатся" );
     }
@@ -183,32 +193,40 @@ class UserDbStorageTest {
     void confirmFriend() {
         long userId1 = 1;
         long userId2 = 2;
-        User byId1 = userDbStorage.getById(userId1);
-        User byId2 = userDbStorage.getById(userId2);
-        userDbStorage.addFriend(byId1.getId(), byId2.getId());
+        User byId1 = userServiceImpl.getById(userId1);
+        User byId2 = userServiceImpl.getById(userId2);
+        userServiceImpl.addFriend(byId1.getId(), byId2.getId());
 
         Friend friend = new Friend();
+        friend.setId(byId2.getId());
         friend.setUserId(byId1.getId());
         friend.setFriendId(byId2.getId());
-        friend.setFriendship(Friendship.NOT_CONFIRMED);
-
-        List<Friend> friends = userDbStorage.getFriends(byId1.getId());
-        int friendId = 0;
-        Friend friend1 = friends.get(friendId);
-
-        assertEquals(friend.getFriendship(), friend1.getFriendship(), "Друзья не подтверждены" );
-
         friend.setFriendship(Friendship.CONFIRMED);
 
-        userDbStorage.confirmFriend(byId1.getId(), byId2.getId());
+        Friend confirmFriend = userServiceImpl.confirmFriend(byId1.getId(), byId2.getId());
 
-        List<Friend> friendsConfirmed = userDbStorage.getFriends(byId1.getId());
-        Friend friend2 = friendsConfirmed.get(friendId);
-
-        assertEquals(friend.getFriendship(), friend2.getFriendship(), "Друзья подтверждены");
+        assertEquals(friend.getFriendship(), confirmFriend.getFriendship(), "Друзья подтверждены");
     }
 
     @Test
     void getFriends() {
+        long userId1 = 1;
+        long userId2 = 2;
+        Set<User> localFriends = new HashSet<>();
+
+        User byId1 = userServiceImpl.getById(userId1);
+        User byId2 = userServiceImpl.getById(userId2);
+
+        Set<User> friends = userServiceImpl.getFriends(byId1.getId());
+
+        assertEquals(localFriends, friends, "Списки друзей пусты");
+
+        userServiceImpl.addFriend(byId1.getId(), byId2.getId());
+        userServiceImpl.confirmFriend(byId1.getId(), byId2.getId());
+        localFriends.add(byId2);
+
+        friends = userServiceImpl.getFriends(byId1.getId());
+
+        assertEquals(localFriends, friends, "Теперь содержат в списках друга");
     }
 }
