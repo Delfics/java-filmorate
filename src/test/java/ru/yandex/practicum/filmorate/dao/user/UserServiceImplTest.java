@@ -186,7 +186,7 @@ class UserServiceImplTest {
         userServiceImpl.deleteFriendById(byId1.getId(), byId2.getId());
         Set<User> friends1 = userServiceImpl.getFriends(byId1.getId());
 
-        assertNotEquals(friendsLocal, friends1, "В Списках друзей больше не содержатся" );
+        assertNotEquals(friendsLocal, friends1, "В Списках друзей больше не содержатся");
     }
 
     @Test

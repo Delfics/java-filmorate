@@ -60,10 +60,10 @@ public class FilmDbStorage implements FilmStorage {
 
         if (film.getMpaId() != zero) {
             int result = jdbcTemplate.update(connection -> {
-                PreparedStatement ps = connection.prepareStatement
-                        ("INSERT INTO film (id, name, description, release_date, duration, mpa_id)" +
-                                        " VALUES (NEXT VALUE FOR FILM_SEQ, ?, ?, ? ,?, ?);",
-                                Statement.RETURN_GENERATED_KEYS);
+                PreparedStatement ps = connection.prepareStatement("INSERT INTO film " +
+                                "(id, name, description, release_date, duration, mpa_id)" +
+                                " VALUES (NEXT VALUE FOR FILM_SEQ, ?, ?, ? ,?, ?);",
+                        Statement.RETURN_GENERATED_KEYS);
                 ps.setObject(1, film.getName());
                 ps.setObject(2, film.getDescription());
                 ps.setObject(3, film.getReleaseDate());
@@ -76,10 +76,10 @@ public class FilmDbStorage implements FilmStorage {
 
         } else {
             int result = jdbcTemplate.update(connection -> {
-                PreparedStatement ps = connection.prepareStatement
-                        ("INSERT INTO film (id, name, description, release_date, duration)" +
-                                        " VALUES (NEXT VALUE FOR FILM_SEQ, ?, ?, ? ,?);",
-                                Statement.RETURN_GENERATED_KEYS);
+                PreparedStatement ps = connection.prepareStatement("INSERT INTO film " +
+                                "(id, name, description, release_date, duration)" +
+                                " VALUES (NEXT VALUE FOR FILM_SEQ, ?, ?, ? ,?);",
+                        Statement.RETURN_GENERATED_KEYS);
                 ps.setObject(1, film.getName());
                 ps.setObject(2, film.getDescription());
                 ps.setObject(3, film.getReleaseDate());
@@ -106,10 +106,10 @@ public class FilmDbStorage implements FilmStorage {
         keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement
-                    ("UPDATE film SET id = ?, name = ?, description = ?, release_date = ?, duration = ?, mpa_id = ?" +
-                                    "WHERE id = ? ;",
-                            Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = connection.prepareStatement("UPDATE film " +
+                            "SET id = ?, name = ?, description = ?, release_date = ?, duration = ?, mpa_id = ?" +
+                            "WHERE id = ? ;",
+                    Statement.RETURN_GENERATED_KEYS);
             ps.setObject(1, newFilm.getId());
             ps.setObject(2, newFilm.getName());
             ps.setObject(3, newFilm.getDescription());
@@ -174,12 +174,12 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Mpa getMpaById(Long MpaId) {
+    public Mpa getMpaById(Long mpaId) {
         try {
             String query = "SELECT * FROM mpa WHERE id = ?;";
-            return jdbcTemplate.queryForObject(query, mpaRowMapper, MpaId);
+            return jdbcTemplate.queryForObject(query, mpaRowMapper, mpaId);
         } catch (EmptyResultDataAccessException e) {
-            throw new NotFoundException("Нет Рейтинга с таким id " + MpaId);
+            throw new NotFoundException("Нет Рейтинга с таким id " + mpaId);
         }
     }
 
@@ -238,8 +238,8 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Set<Like> getLikes(Long filmId) {
         String query = "SELECT * FROM likes WHERE film_id = ?;";
-        List<Like> user_ids = jdbcTemplate.query(query, likesRowMapper, filmId);
-        return new HashSet<>(user_ids);
+        List<Like> userIds = jdbcTemplate.query(query, likesRowMapper, filmId);
+        return new HashSet<>(userIds);
     }
 
     @Override
@@ -247,10 +247,9 @@ public class FilmDbStorage implements FilmStorage {
         keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement
-                    ("INSERT INTO likes (id, user_id, film_id)" +
-                                    " VALUES (NEXT VALUE FOR likes_seq, ?, ?);",
-                            Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO likes (id, user_id, film_id)" +
+                            " VALUES (NEXT VALUE FOR likes_seq, ?, ?);",
+                    Statement.RETURN_GENERATED_KEYS);
             ps.setObject(1, userId);
             ps.setObject(2, filmId);
 

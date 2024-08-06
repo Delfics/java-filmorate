@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.dao.user.UserDbStorage;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.model.enums.Genres;
 import ru.yandex.practicum.filmorate.service.FilmServiceImpl;
-import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.service.UserServiceImpl;
 
 import java.time.LocalDate;
@@ -41,7 +40,7 @@ class FilmServiceImplTest {
         film.setId(1L);
         film.setName("Терминатор");
         film.setDescription("Про робота");
-        film.setReleaseDate(LocalDate.of(1994,11,19));
+        film.setReleaseDate(LocalDate.of(1994, 11, 19));
         film.setDuration(113);
         film.setMpaId(3);
         Mpa mpaByFilmId = filmServiceImpl.getMpaByFilmId(film.getId());
