@@ -38,10 +38,10 @@ public class UserDbStorage implements UserStorage {
         keyHolder = new GeneratedKeyHolder();
 
         int result = jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement
-                    ("INSERT INTO users (id, email, login, name, birthday)" +
-                                    " VALUES (NEXT VALUE FOR USER_SEQ, ?, ?, ? ,?);",
-                            Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO " +
+                            "users (id, email, login, name, birthday)" +
+                            " VALUES (NEXT VALUE FOR USER_SEQ, ?, ?, ? ,?);",
+                    Statement.RETURN_GENERATED_KEYS);
             ps.setObject(1, user.getEmail());
             ps.setObject(2, user.getLogin());
             ps.setObject(3, user.getName());
@@ -74,10 +74,10 @@ public class UserDbStorage implements UserStorage {
         keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement
-                    ("UPDATE users SET id = ?, email = ?, login = ?, name = ?, birthday = ?" +
-                                    "WHERE id = ? ;",
-                            Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = connection.prepareStatement("UPDATE users" +
+                            " SET id = ?, email = ?, login = ?, name = ?, birthday = ?" +
+                            "WHERE id = ? ;",
+                    Statement.RETURN_GENERATED_KEYS);
             ps.setObject(1, newUser.getId());
             ps.setObject(2, newUser.getEmail());
             ps.setObject(3, newUser.getLogin());
@@ -128,8 +128,7 @@ public class UserDbStorage implements UserStorage {
         Friend friend = jdbcTemplate.queryForObject(query, friendRowMapper, userId, friendId);
 
         jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement
-                    ("UPDATE friends SET friendship = ? WHERE id = ?;");
+            PreparedStatement ps = connection.prepareStatement("UPDATE friends SET friendship = ? WHERE id = ?;");
             ps.setObject(1, Friendship.CONFIRMED.getValue());
             ps.setObject(2, friend.getId());
             return ps;
