@@ -43,7 +43,6 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film create(Film film) {
         keyHolder = new GeneratedKeyHolder();
-        long zero = 0;
         byte six = 6;
         byte one = 1;
 
@@ -210,10 +209,7 @@ public class FilmDbStorage implements FilmStorage {
     public List<Genre> getGenresByFilmId(Long filmId) {
         String query = "SELECT * FROM genres WHERE id IN (" +
                 "SELECT genre_id FROM film_genres WHERE film_id = ?);";
-        /*List<Genre> genre = jdbcTemplate.query(query, genreRowMapper, filmId);*/
-        /*return new HashSet<>(genre);*/
         return jdbcTemplate.query(query, genreRowMapper, filmId);
-
     }
 
     @Override
