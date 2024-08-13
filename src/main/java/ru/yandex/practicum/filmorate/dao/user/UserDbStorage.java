@@ -139,8 +139,8 @@ public class UserDbStorage implements UserStorage {
             boolean userExist = userExists(userId);
             boolean friendExists = userExists(friendId);
             if (userExist && friendExists) {
-                return jdbcTemplate.update("DELETE FROM friends WHERE user_id = ? AND friend_id = ? ;"
-                        , userId, friendId) > 0;
+                return jdbcTemplate.update("DELETE FROM friends WHERE user_id = ? AND friend_id = ? ;",
+                        userId, friendId) > 0;
             } else {
                 throw new NotFoundException("Не содержит данного пользователя " + userId + " или " + friendId);
             }
