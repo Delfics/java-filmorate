@@ -58,9 +58,7 @@ public class UserDbStorage implements UserStorage {
         }
 
         Integer generatedId = keyHolder.getKeyAs(Integer.class);
-
         user.setId((long) generatedId);
-
         return user;
     }
 
@@ -192,7 +190,7 @@ public class UserDbStorage implements UserStorage {
 
     public Set<User> getFriendsUsers(Long userId) {
         try {
-            if(userExists(userId)) {
+            if (userExists(userId)) {
                 String query = "SELECT DISTINCT users.id, users.email, users.login, users.name, " +
                         "users.birthday, friends.friend_id " +
                         "FROM users " +
