@@ -192,6 +192,7 @@ public class UserDbStorage implements UserStorage {
 
     public Set<User> getFriends1(Long userId) {
         try {
+            userExists(userId);
             String query = "SELECT DISTINCT users.id, users.email, users.login, users.name, " +
                     "users.birthday, friends.friend_id " +
                     "FROM users " +
