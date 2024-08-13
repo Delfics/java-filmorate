@@ -67,12 +67,17 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public Set<User> getFriends1(Long userId) {
+    public Set<User> getFriendsUsers(Long userId) {
         return Set.of();
     }
 
     @Override
     public boolean userExists(Long userId) {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Set<User> getCollectiveFriends(Long userId, Long friendId) {
+        return Set.of();
     }
 }

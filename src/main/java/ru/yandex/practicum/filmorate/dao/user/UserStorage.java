@@ -27,7 +27,9 @@ public interface UserStorage {
 
     Set<Friend> getFriends(Long userId);
 
-    Set<User> getFriends1(Long userId);
+    Set<User> getFriendsUsers(Long userId);
 
     boolean userExists(Long userId);
+
+    Set<User> getCollectiveFriends(Long userId, Long friendId);
 }

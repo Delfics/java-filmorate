@@ -153,18 +153,9 @@ class UserServiceImplTest {
         User byId2 = userServiceImpl.getById(userId2);
 
         Set<User> friendsLocal = new HashSet<>();
-        User userLocal = new User();
-        userLocal.setId(byId1.getId());
-        userLocal.setName(byId1.getName());
-        userLocal.setLogin(byId1.getLogin());
-        userLocal.setBirthday(byId1.getBirthday());
-        userLocal.setEmail(byId1.getEmail());
-        Set<Long> friendId = new HashSet<>();
-        friendId.add(byId2.getId());
-        userLocal.setFriends(friendId);
-        friendsLocal.add(userLocal);
+        friendsLocal.add(byId2);
 
-        User user = userServiceImpl.addFriend(byId1.getId(), byId2.getId());
+        userServiceImpl.addFriend(byId1.getId(), byId2.getId());
         userServiceImpl.confirmFriend(byId1.getId(), byId2.getId());
         Set<User> friends = userServiceImpl.getFriends(byId1.getId());
 

@@ -93,26 +93,17 @@ public class UserServiceImpl implements UserService {
     public Set<User> getCollectiveFriends(Long id, Long otherId) {
         log.info("Начало получение списка общих друзей");
 
-        Set<User> userFriends = getFriends(id);
-        Set<User> otherFriends = getFriends(otherId);
+        Set<User> collectiveFriends = userDbStorage.getCollectiveFriends(id, otherId);
 
-        Set<User> result = new HashSet<>();
-        userFriends.forEach(user -> {
-            result.addAll(otherFriends.stream().filter(otherFriend ->
-                            otherFriend.getId().equals(user.getId()))
-                    .collect(Collectors.toSet()));
-        });
-
-        /*Set<User> result = userDbStorage.getCollectiveFriends(id, otherId);*/
         log.info("Для {} и {} список общих друзей успешно получен", id, otherId);
-        return result;
+        return collectiveFriends;
     }
 
     @Override
     public Set<User> getFriends(Long id) {
         log.info("Начало получение списка друзей");
 
-        Set<User> users = userDbStorage.getFriends1(id);
+        Set<User> users = userDbStorage.getFriendsUsers(id);
 
        /* User user = userDbStorage.getById(id);
 

@@ -37,7 +37,7 @@ public class UserResultSetMapper implements ResultSetExtractor<List<User>> {
 
             /*if (rs.getLong("friends.friend_id") != 0) {*/
                 long friendId = rs.getLong("friends.friend_id");
-                if (friendId != 0) {
+                if (friendId != 0 && friendId != currentUser.getId()) {
                     friends.add(friendId);
                 }
            /* }*/

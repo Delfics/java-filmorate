@@ -190,18 +190,44 @@ public class UserDbStorage implements UserStorage {
         return jdbcTemplate.queryForObject(sql, Boolean.class, userId);
     }
 
-    public Set<User> getFriends1(Long userId) {
+    public Set<User> getFriendsUsers(Long userId) {
         try {
-            userExists(userId);
-            String query = "SELECT DISTINCT users.id, users.email, users.login, users.name, " +
-                    "users.birthday, friends.friend_id " +
-                    "FROM users " +
-                    "LEFT JOIN friends ON users.id = friends.user_id " +
-                    "WHERE friends.user_id = ?";
-            List<User> friends = jdbcTemplate.query(query, userResultSetMapper, userId);
-            return new HashSet<>(friends);
+            if(userExists(userId)) {
+                String query = "SELECT DISTINCT users.id, users.email, users.login, users.name, " +
+                        "users.birthday, friends.friend_id " +
+                        "FROM users " +
+                        "LEFT JOIN friends ON users.id = friends.friend_id " +
+                        "WHERE friends.user_id = ? ";
+                List<User> friends = jdbcTemplate.query(query, userResultSetMapper, userId);
+                return new HashSet<>(friends);
+            } else {
+                throw new NotFoundException("Не найден пользователь " + userId);
+            }
         } catch (RuntimeException e) {
             throw new NotFoundException("Не найдены друзья у пользователя " + userId);
         }
     }
+
+
+    @Override
+    public Set<User> getCollectiveFriends(Long userId, Long friendId) {
+        try {
+            String query = "SELECT DISTINCT users.id, users.email, users.login, users.name, users.birthday, " +
+                    "friends.friend_id " +
+                    "FROM friends " +
+                    "JOIN friends f2 ON friends.friend_id = f2.friend_id " +
+                    "JOIN users  ON friends.friend_id = users.id " +
+                    "WHERE friends.user_id = ? " +
+                    "AND f2.user_id = ?;";
+            List<User> collectiveFriends = jdbcTemplate.query(query, userResultSetMapper, userId, friendId);
+            return new HashSet<>(collectiveFriends);
+        } catch (RuntimeException e) {
+            throw new NotFoundException("Не найдены общие друзья у пользователей " + userId + " и " + friendId);
+        }
+    }
 }
+/*"SELECT DISTINCT users.id, users.email, users.login, users.name, " +
+                    "users.birthday, friends.friend_id " +
+                    "FROM users " +
+                    "LEFT JOIN friends ON users.id = friends.user_id " +
+                    "WHERE friends.user_id = ?";*/
