@@ -53,7 +53,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Mpa getMpaById(Long MpaId) {
+    public Mpa getMpaById(Long mpaId) {
         return null;
     }
 
@@ -76,7 +76,6 @@ public class InMemoryFilmStorage implements FilmStorage {
     public List<Genre> getGenresByFilmId(Long filmId) {
         return List.of();
     }
-
 
     @Override
     public Set<Like> getLikes(Long filmId) {
