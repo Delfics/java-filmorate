@@ -23,18 +23,4 @@ public class Film {
     Set<Like> likes = new HashSet<>();
     List<Genre> genres = new ArrayList<>();
     Mpa mpa;
-
-
-
-
-/*    private HashMap<String, String> MpaResources() {
-        HashMap <String, String> map = new HashMap<>();
-        map.put("G", " — у фильма нет возрастных ограничений.");
-        map.put("PG", " — детям рекомендуется смотреть фильм с родителями.");
-        map.put("PG-13", " — детям до 13 лет просмотр не желателен.");
-        map.put("R", " лицам до 17 лет просматривать фильм можно только в присутствии взрослого.");
-        map.put("NC-17", " — лицам до 18 лет просмотр запрещён.");
-        return map;
-    }*/
-
 }

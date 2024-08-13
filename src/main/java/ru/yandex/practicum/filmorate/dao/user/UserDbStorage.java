@@ -226,8 +226,3 @@ public class UserDbStorage implements UserStorage {
         }
     }
 }
-/*"SELECT DISTINCT users.id, users.email, users.login, users.name, " +
-                    "users.birthday, friends.friend_id " +
-                    "FROM users " +
-                    "LEFT JOIN friends ON users.id = friends.user_id " +
-                    "WHERE friends.user_id = ?";*/

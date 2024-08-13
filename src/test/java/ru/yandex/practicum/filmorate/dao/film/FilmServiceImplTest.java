@@ -186,8 +186,6 @@ class FilmServiceImplTest {
         genre.setId(6);
         genre.setName(Genres.Боевик);
         genres.add(genre);
-        long mpaId = 3;
-
 
         Film film = new Film();
         film.setName(name);
@@ -195,13 +193,8 @@ class FilmServiceImplTest {
         film.setReleaseDate(releaseDate);
         film.setDuration(duration);
         film.setGenres(genres);
-        /*film.setMpa(filmServiceImpl.getMpaById(mpaId));*/
 
         Film filmCreated = filmServiceImpl.create(film);
-
-        List<Film> allValues = filmServiceImpl.getAllValues();
-
-        Film byId = filmServiceImpl.getById(filmCreated.getId());
 
         filmServiceImpl.deleteById(filmCreated.getId());
 
@@ -256,7 +249,6 @@ class FilmServiceImplTest {
         mpa.setId(mpaId);
         mpa.setName(name);
 
-
         Mpa mpaById = filmServiceImpl.getMpaByFilmId(id);
 
         assertEquals(mpa, mpaById, "Mpa равны друг другу");
@@ -296,7 +288,6 @@ class FilmServiceImplTest {
         genresLocal.add(genre5);
         genresLocal.add(genre6);
 
-
         List<Genre> genres = filmServiceImpl.getGenres();
 
         assertEquals(genresLocal, genres, "Жанры идентичны");
@@ -307,7 +298,6 @@ class FilmServiceImplTest {
         Genre genre1 = new Genre();
         genre1.setId(6);
         genre1.setName(Genres.Боевик);
-
 
         Genre genreById = filmServiceImpl.getGenreById(genre1.getId());
 
@@ -328,7 +318,6 @@ class FilmServiceImplTest {
         like.setFilmId(filmId);
 
         likesLocal.add(like);
-
 
         User userById = userServiceImpl.getById(userId);
         Film filmById = filmServiceImpl.getById(filmId);
@@ -355,7 +344,6 @@ class FilmServiceImplTest {
         like.setFilmId(filmId);
 
         likes.add(like);
-
 
         User userById = userServiceImpl.getById(userId);
         Film filmById = filmServiceImpl.getById(filmId);

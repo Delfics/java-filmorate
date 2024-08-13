@@ -9,5 +9,4 @@ public class Friend {
     long userId;
     long friendId;
     Friendship friendship;
-
 }

@@ -36,8 +36,6 @@ class UserServiceImplTest {
         long id2 = 2;
         List<User> values = new ArrayList<>();
 
-        List<User> allValue1s = userServiceImpl.getAllValues();
-
         User byId = userServiceImpl.getById(id1);
         User byId1 = userServiceImpl.getById(id2);
         values.add(byId);

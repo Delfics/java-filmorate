@@ -10,8 +10,6 @@ import ru.yandex.practicum.filmorate.model.Friend;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.*;
-import java.util.stream.Collectors;
-
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -105,12 +103,6 @@ public class UserServiceImpl implements UserService {
 
         Set<User> users = userDbStorage.getFriendsUsers(id);
 
-       /* User user = userDbStorage.getById(id);
-
-        Set<Friend> friends = userDbStorage.getFriends(user.getId());
-
-        Set<User> users = friends.stream()
-                .map(friend -> userDbStorage.getById(friend.getFriendId())).collect(Collectors.toSet());*/
         log.info("Список друзей получен пользователя " + id);
         return users;
     }
