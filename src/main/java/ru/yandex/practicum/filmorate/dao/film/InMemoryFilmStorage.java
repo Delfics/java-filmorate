@@ -1,4 +1,3 @@
-/*
 package ru.yandex.practicum.filmorate.dao.film;
 
 import org.springframework.stereotype.Component;
@@ -74,8 +73,8 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public Set<Genre> getGenresByFilmId(Long filmId) {
-        return Set.of();
+    public List<Genre> getGenresByFilmId(Long filmId) {
+        return List.of();
     }
 
 
@@ -94,6 +93,11 @@ public class InMemoryFilmStorage implements FilmStorage {
         return false;
     }
 
+    @Override
+    public boolean filmExists(Long filmId) {
+        throw new UnsupportedOperationException("not supported yet.");
+    }
+
 
     public void remove(Film film) {
         films.remove(film.getId());
@@ -109,4 +113,3 @@ public class InMemoryFilmStorage implements FilmStorage {
         return ++currentMaxId;
     }
 }
-*/

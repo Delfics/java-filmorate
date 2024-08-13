@@ -6,7 +6,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dal.mappers.FriendRowMapper;
-import ru.yandex.practicum.filmorate.dal.mappers.UserRowMapper;
+import ru.yandex.practicum.filmorate.dal.mappers.UserResultSetMapper;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Friend;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.enums.Friendship;
@@ -16,21 +17,23 @@ import java.sql.Statement;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Repository
 @Primary
 @RequiredArgsConstructor
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
-    private final UserRowMapper userRowMapper;
+    private final UserResultSetMapper userResultSetMapper;
     private final FriendRowMapper friendRowMapper;
     private GeneratedKeyHolder keyHolder;
 
     @Override
     public List<User> getAll() {
-        String query = "SELECT * FROM users;";
-        return jdbcTemplate.query(query, userRowMapper);
+        String query = "SELECT DISTINCT users.id, users.email, users.login, users.name, users.birthday, " +
+                "friends.friend_id " +
+                "FROM users " +
+                "LEFT JOIN friends ON users.id = friends.user_id ";
+        return jdbcTemplate.query(query, userResultSetMapper);
     }
 
     @Override
@@ -50,6 +53,10 @@ public class UserDbStorage implements UserStorage {
             return ps;
         }, keyHolder);
 
+        if (result < 1) {
+            throw new NotFoundException("Пользователь " + user.getName() + " не создан");
+        }
+
         Integer generatedId = keyHolder.getKeyAs(Integer.class);
 
         user.setId((long) generatedId);
@@ -59,21 +66,24 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User getById(Long id) {
-        String query = "SELECT * FROM users WHERE id = ?;";
-        User user = jdbcTemplate.queryForObject(query, userRowMapper, id);
-        Set<Friend> friends = getFriends(id);
-        Set<Long> friendsIds = friends.stream()
-                .map(Friend::getFriendId)
-                .collect(Collectors.toSet());
-        user.setFriends(friendsIds);
-        return user;
+        try {
+            String query = "SELECT DISTINCT users.id, users.email, users.login, users.name, users.birthday, " +
+                    "friends.friend_id " +
+                    "FROM users " +
+                    "LEFT JOIN friends ON users.id = friends.user_id " +
+                    "WHERE users.id = ?;";
+            List<User> users = jdbcTemplate.query(query, userResultSetMapper, id);
+            return users.get(0);
+        } catch (RuntimeException e) {
+            throw new NotFoundException("Пользователь с " + id + " не найден");
+        }
     }
 
     @Override
     public User update(User newUser) {
         keyHolder = new GeneratedKeyHolder();
 
-        jdbcTemplate.update(connection -> {
+        int result = jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement("UPDATE users" +
                             " SET id = ?, email = ?, login = ?, name = ?, birthday = ?" +
                             "WHERE id = ? ;",
@@ -88,6 +98,9 @@ public class UserDbStorage implements UserStorage {
             return ps;
         }, keyHolder);
 
+        if (result < 1) {
+            throw new NotFoundException("Пользователь " + newUser.getName() + " не обновлен");
+        }
 
         Integer generatedId = keyHolder.getKeyAs(Integer.class);
 
@@ -103,45 +116,91 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User addFriend(Long userId, Long friendId) {
         keyHolder = new GeneratedKeyHolder();
+        try {
+            int result = jdbcTemplate.update(con -> {
+                PreparedStatement ps = con.prepareStatement(
+                        "INSERT INTO friends (user_id, friend_id, friendship) VALUES (?, ?, ?);");
+                ps.setObject(1, userId);
+                ps.setObject(2, friendId);
+                ps.setObject(3, Friendship.NOT_CONFIRMED.getValue());
+                return ps;
+            }, keyHolder);
 
-        jdbcTemplate.update(con -> {
-            PreparedStatement ps = con.prepareStatement(
-                    "INSERT INTO friends (user_id, friend_id, friendship) VALUES (?, ?, ?);");
-            ps.setObject(1, userId);
-            ps.setObject(2, friendId);
-            ps.setObject(3, Friendship.NOT_CONFIRMED.getValue());
-            return ps;
-        }, keyHolder);
+            if (result < 1) {
+                throw new NotFoundException("Пользователь с " + userId + " или с " + friendId + " не обновлен");
+            }
+        } catch (RuntimeException e) {
+            throw new NotFoundException("Добавление не существующих пользователей " + userId + " или " + friendId);
+        }
         return getById(userId);
     }
 
     @Override
     public boolean deleteFriend(Long userId, Long friendId) {
-        boolean b = jdbcTemplate.update("DELETE FROM friends WHERE user_id = ? ;", userId) > 0;
-        return b;
+        try {
+            boolean userExist = userExists(userId);
+            boolean friendExists = userExists(friendId);
+            if (userExist && friendExists) {
+                return jdbcTemplate.update("DELETE FROM friends WHERE user_id = ? AND friend_id = ? ;"
+                        , userId, friendId) > 0;
+            } else {
+                throw new NotFoundException("Не содержит данного пользователя " + userId + " или " + friendId);
+            }
+        } catch (RuntimeException e) {
+            throw new NotFoundException("Пользователи " + userId + " или " + friendId + " не найдены");
+        }
     }
 
     @Override
     public Friend confirmFriend(Long userId, Long friendId) {
+        try {
 
-        String query = "SELECT * FROM friends WHERE user_id = ? AND friend_id = ?;";
-        Friend friend = jdbcTemplate.queryForObject(query, friendRowMapper, userId, friendId);
+            String query = "SELECT * FROM friends WHERE user_id = ? AND friend_id = ?;";
+            Friend friend = jdbcTemplate.queryForObject(query, friendRowMapper, userId, friendId);
 
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement("UPDATE friends SET friendship = ? WHERE id = ?;");
-            ps.setObject(1, Friendship.CONFIRMED.getValue());
-            ps.setObject(2, friend.getId());
-            return ps;
-        });
-        return jdbcTemplate.queryForObject(query, friendRowMapper, userId, friendId);
+            int result = jdbcTemplate.update(connection -> {
+                PreparedStatement ps = connection.prepareStatement("UPDATE friends SET friendship = ? WHERE id = ?;");
+                ps.setObject(1, Friendship.CONFIRMED.getValue());
+                ps.setObject(2, friend.getId());
+                return ps;
+            });
+            if (result < 1) {
+                throw new NotFoundException("Пользователь " + friendId + " не стал другом " + userId);
+            }
+            return jdbcTemplate.queryForObject(query, friendRowMapper, userId, friendId);
 
-
+        } catch (RuntimeException e) {
+            throw new NotFoundException("Пользователь " + friendId + " не найден");
+        }
     }
 
     @Override
     public Set<Friend> getFriends(Long userId) {
-        String query = "SELECT * FROM friends WHERE user_id = ?;";
-        List<Friend> query1 = jdbcTemplate.query(query, friendRowMapper, userId);
-        return new HashSet<>(query1);
+        try {
+            String query = "SELECT * FROM friends WHERE user_id = ?;";
+            List<Friend> query1 = jdbcTemplate.query(query, friendRowMapper, userId);
+            return new HashSet<>(query1);
+        } catch (RuntimeException e) {
+            throw new NotFoundException("Пользователь не найден с таким id " + userId);
+        }
+    }
+
+    public boolean userExists(Long userId) {
+        String sql = "SELECT EXISTS (SELECT 1 FROM users WHERE id = ?)";
+        return jdbcTemplate.queryForObject(sql, Boolean.class, userId);
+    }
+
+    public Set<User> getFriends1(Long userId) {
+        try {
+            String query = "SELECT DISTINCT users.id, users.email, users.login, users.name, " +
+                    "users.birthday, friends.friend_id " +
+                    "FROM users " +
+                    "LEFT JOIN friends ON users.id = friends.user_id " +
+                    "WHERE friends.user_id = ?";
+            List<User> friends = jdbcTemplate.query(query, userResultSetMapper, userId);
+            return new HashSet<>(friends);
+        } catch (RuntimeException e) {
+            throw new NotFoundException("Не найдены друзья у пользователя " + userId);
+        }
     }
 }

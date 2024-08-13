@@ -24,9 +24,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @JdbcTest
 @ExtendWith(SpringExtension.class)
 @AutoConfigureTestDatabase
-@Import({FilmServiceImpl.class, FilmDbStorage.class, FilmRowMapper.class,
+@Import({FilmServiceImpl.class, FilmDbStorage.class, FilmResultSetMapper.class,
         MpaRowMapper.class, GenreRowMapper.class, LikesRowMapper.class,
-        UserServiceImpl.class, UserDbStorage.class, UserRowMapper.class, FriendRowMapper.class})
+        UserServiceImpl.class, UserDbStorage.class, UserResultSetMapper.class, FriendRowMapper.class})
 class FilmServiceImplTest {
     @Autowired
     private FilmServiceImpl filmServiceImpl;
@@ -48,10 +48,7 @@ class FilmServiceImplTest {
         Mpa mpaByFilmId = filmServiceImpl.getMpaByFilmId(film.getId());
         film.setMpa(mpaByFilmId);
 
-        Genre genreById = filmServiceImpl.getGenreById(genreId);
-
-        List<Genre> genres = new ArrayList<>();
-        genres.add(genreById);
+        List<Genre> genres = filmServiceImpl.getGenresByFilmId(film.getId());
 
         film.setGenres(genres);
 
@@ -82,7 +79,6 @@ class FilmServiceImplTest {
         mpa1.setId(mpaId);
         Mpa mpaById = filmServiceImpl.getMpaById(mpa1.getId());
 
-
         Film film = new Film();
         film.setName(name);
         film.setDescription(description);
@@ -90,7 +86,6 @@ class FilmServiceImplTest {
         film.setDuration(duration);
         film.setGenres(genres);
         film.setMpa(mpaById);
-
 
         Optional<Film> filmOptional = Optional.ofNullable(filmServiceImpl.create(film));
 
@@ -117,7 +112,6 @@ class FilmServiceImplTest {
         DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate releaseDate = LocalDate.of(1999, 12, 19);
         int duration = 211;
-        long mpaFilmId = 5;
 
         Genre genre = new Genre();
         genre.setId(2);
@@ -192,6 +186,8 @@ class FilmServiceImplTest {
         genre.setId(6);
         genre.setName(Genres.Боевик);
         genres.add(genre);
+        long mpaId = 3;
+
 
         Film film = new Film();
         film.setName(name);
@@ -199,14 +195,18 @@ class FilmServiceImplTest {
         film.setReleaseDate(releaseDate);
         film.setDuration(duration);
         film.setGenres(genres);
+        /*film.setMpa(filmServiceImpl.getMpaById(mpaId));*/
 
+        Film filmCreated = filmServiceImpl.create(film);
 
-        Optional<Film> filmOptional = Optional.ofNullable(filmServiceImpl.create(film));
+        List<Film> allValues = filmServiceImpl.getAllValues();
 
-        filmServiceImpl.deleteById(filmOptional.get().getId());
+        Film byId = filmServiceImpl.getById(filmCreated.getId());
+
+        filmServiceImpl.deleteById(filmCreated.getId());
 
         List<Film> all = filmServiceImpl.getAllValues();
-        boolean contains = all.contains(filmOptional.get());
+        boolean contains = all.contains(filmCreated);
 
         assertFalse(contains, "Фильма не существует");
 

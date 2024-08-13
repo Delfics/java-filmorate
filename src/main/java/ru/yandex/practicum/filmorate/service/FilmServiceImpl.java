@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.dao.film.FilmStorage;
@@ -17,7 +18,7 @@ public class FilmServiceImpl implements FilmService {
     private final UserService userService;
 
     @Autowired
-    public FilmServiceImpl(FilmStorage filmStorage, UserService userService) {
+    public FilmServiceImpl(FilmStorage filmStorage, UserService userService, FilmDbStorage filmDbStorage) {
         this.filmStorage = filmStorage;
         this.userService = userService;
     }
@@ -31,23 +32,20 @@ public class FilmServiceImpl implements FilmService {
     public void addLike(Long filmId, Long userId) {
         log.info("Начало добавления лайка для фильма с id - {} от пользователя id - {}", filmId, userId);
 
-        throwNotFoundIfFilmOrUserNotExist(filmId, userId);
 
         Film film = filmStorage.getById(filmId);
         User user = userService.getById(userId);
         if (film != null && user != null) {
             filmStorage.addLike(film.getId(), user.getId());
+            log.info("Лайк добавлен к фильму с id {} от пользователя с id: {}", film.getId(), user.getId());
         } else {
-            throwNotFoundIfFilmOrUserNotExist(film.getId(), user.getId());
+            throw new NotFoundException("Добавление лайка не выполнено");
         }
-        log.info("Лайк добавлен к фильму с id {} от пользователя с id: {}", film.getId(), user.getId());
     }
 
     @Override
     public void deleteLike(Long filmId, Long userId) {
         log.info("Начало удаление лайка для фильма с id - {} от пользователя id - {}", filmId, userId);
-
-        throwNotFoundIfFilmOrUserNotExist(filmId, userId);
 
         Film film = filmStorage.getById(filmId);
         User user = userService.getById(userId);
@@ -57,7 +55,7 @@ public class FilmServiceImpl implements FilmService {
                 log.info("Лайк удален у фильма с id {} от пользователя с id: {}", film.getId(), user.getId());
             }
         } else {
-            throwNotFoundIfFilmOrUserNotExist(film.getId(), user.getId());
+            throw new NotFoundException("Удаление не выполнено");
         }
     }
 
@@ -88,20 +86,7 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public List<Film> getAllValues() {
-        List<Film> all = filmStorage.getAll();
-        for (Film film : all) {
-            try {
-                Mpa mpa = getMpaByFilmId(film.getId());
-                film.setMpa(mpa);
-            } catch (NotFoundException e) {
-                log.warn(e.getMessage());
-            }
-            film.setGenres(getGenresByFilmId(film.getId()));
-            if (film.getLikes() != null) {
-                film.setLikes(filmStorage.getLikes(film.getId()));
-            }
-        }
-        return all;
+        return filmStorage.getAll();
     }
 
     @Override
@@ -120,11 +105,9 @@ public class FilmServiceImpl implements FilmService {
 
         ValidateFilm.validate(film);
 
-        Film film1 = filmStorage.create(film);
-        if (filmStorage.getAll().contains(film)) {
-            log.debug("Успешно создался film с id - {}", film.getId());
-        }
-        return film1;
+        Film createdFilm = filmStorage.create(film);
+        log.debug("Успешно создался film с id - {}", createdFilm.getId());
+        return createdFilm;
     }
 
     @Override
@@ -182,13 +165,5 @@ public class FilmServiceImpl implements FilmService {
     @Override
     public List<Genre> getGenresByFilmId(Long filmId) {
         return filmStorage.getGenresByFilmId(filmId);
-    }
-
-    private void throwNotFoundIfFilmOrUserNotExist(Long filmId, Long userId) {
-        if (!userService.getAllValues().contains(userService.getById(userId))) {
-            throw new NotFoundException("Пользователь с таким id: " + userId + " не найден");
-        } else if (!getAllValues().contains(filmStorage.getById(filmId))) {
-            throw new NotFoundException("Фильм с таким id: " + filmId + " не найден");
-        }
     }
 }

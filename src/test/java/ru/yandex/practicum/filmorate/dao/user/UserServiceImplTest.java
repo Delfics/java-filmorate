@@ -8,7 +8,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.yandex.practicum.filmorate.dal.mappers.FriendRowMapper;
-import ru.yandex.practicum.filmorate.dal.mappers.UserRowMapper;
+import ru.yandex.practicum.filmorate.dal.mappers.UserResultSetMapper;
 import ru.yandex.practicum.filmorate.model.Friend;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.enums.Friendship;
@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(SpringExtension.class)
 @AutoConfigureTestDatabase
 @Import({UserServiceImpl.class, UserDbStorage.class,
-        UserRowMapper.class, FriendRowMapper.class})
+        UserResultSetMapper.class, FriendRowMapper.class})
 class UserServiceImplTest {
     @Autowired
     private UserServiceImpl userServiceImpl;
@@ -35,6 +35,8 @@ class UserServiceImplTest {
         long id1 = 1;
         long id2 = 2;
         List<User> values = new ArrayList<>();
+
+        List<User> allValue1s = userServiceImpl.getAllValues();
 
         User byId = userServiceImpl.getById(id1);
         User byId1 = userServiceImpl.getById(id2);
@@ -152,14 +154,17 @@ class UserServiceImplTest {
 
         Set<User> friendsLocal = new HashSet<>();
         User userLocal = new User();
-        userLocal.setId(byId2.getId());
-        userLocal.setName(byId2.getName());
-        userLocal.setLogin(byId2.getLogin());
-        userLocal.setBirthday(byId2.getBirthday());
-        userLocal.setEmail(byId2.getEmail());
+        userLocal.setId(byId1.getId());
+        userLocal.setName(byId1.getName());
+        userLocal.setLogin(byId1.getLogin());
+        userLocal.setBirthday(byId1.getBirthday());
+        userLocal.setEmail(byId1.getEmail());
+        Set<Long> friendId = new HashSet<>();
+        friendId.add(byId2.getId());
+        userLocal.setFriends(friendId);
         friendsLocal.add(userLocal);
 
-        userServiceImpl.addFriend(byId1.getId(), byId2.getId());
+        User user = userServiceImpl.addFriend(byId1.getId(), byId2.getId());
         userServiceImpl.confirmFriend(byId1.getId(), byId2.getId());
         Set<User> friends = userServiceImpl.getFriends(byId1.getId());
 

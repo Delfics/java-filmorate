@@ -9,4 +9,13 @@ public class Like {
     long id;
     long userId;
     long filmId;
+
+    public Like() {
+    }
+
+    public Like(long id, long userId, long filmId) {
+        this.id = id;
+        this.userId = userId;
+        this.filmId = filmId;
+    }
 }

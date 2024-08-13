@@ -1,14 +1,10 @@
-/*
 package ru.yandex.practicum.filmorate.dao.user;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Friend;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class InMemoryUserStorage implements UserStorage {
@@ -52,7 +48,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void confirmFriend(Long userId, Long friendId) {
+    public Friend confirmFriend(Long userId, Long friendId) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -66,8 +62,17 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public List<Friend> getFriends(Long userId) {
+    public Set<Friend> getFriends(Long userId) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Set<User> getFriends1(Long userId) {
+        return Set.of();
+    }
+
+    @Override
+    public boolean userExists(Long userId) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }
-*/

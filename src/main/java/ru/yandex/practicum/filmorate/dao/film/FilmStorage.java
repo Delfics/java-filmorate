@@ -38,4 +38,6 @@ public interface FilmStorage {
     void addLike(Long filmId, Long userId);
 
     boolean deleteLike(Long filmId, Long userId);
+
+    boolean filmExists(Long filmId);
 }

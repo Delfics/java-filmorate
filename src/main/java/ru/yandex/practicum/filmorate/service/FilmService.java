@@ -38,4 +38,5 @@ public interface FilmService {
     List<Genre> getGenres();
 
     Genre getGenreById(Long genreId);
+
 }
