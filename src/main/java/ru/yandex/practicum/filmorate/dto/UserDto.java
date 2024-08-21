@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Data
-public class User {
+public class UserDto {
     Long id;
     @NotNull
     String email;
@@ -22,4 +22,3 @@ public class User {
     LocalDate birthday;
     Set<Long> friends = new HashSet<>();
 }
-
