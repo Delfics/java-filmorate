@@ -19,6 +19,7 @@ import ru.yandex.practicum.filmorate.model.Like;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 
@@ -147,6 +148,7 @@ public class FilmDbStorage implements FilmStorage {
             for (Genre genre : newFilm.getGenres()) {
                 updateGenresFromFilm(newFilm.getId(), genre.getId());
             }
+            /*batchUpdateGenres(newFilm);*/
             List<Genre> genresByFilmId = getGenresByFilmId(newFilm.getId());
             newFilm.setGenres(genresByFilmId);
         }
@@ -284,5 +286,30 @@ public class FilmDbStorage implements FilmStorage {
     public boolean filmExists(Long filmId) {
         String sql = "SELECT EXISTS (SELECT 1 FROM films WHERE film_id = ?)";
         return jdbcTemplate.queryForObject(sql, Boolean.class, filmId);
+    }
+
+    public void batchUpdateGenres(Film film) {
+            jdbcTemplate.update(connection -> {
+                try {
+                    connection.setAutoCommit(false);
+                    PreparedStatement ps = connection.prepareStatement(
+                            "INSERT INTO film_genres (id, film_id, genre_id) VALUES" +
+                                    " (NEXT VALUE FOR film_genres_seq, ?, ?);",
+                            Statement.RETURN_GENERATED_KEYS);
+                    for (Genre genre : film.getGenres()) {
+                        ps.setObject(1, film.getId());
+                        ps.setObject(2, genre.getId());
+                        ps.addBatch();
+                    }
+
+                    int[] updateCount = ps.executeBatch();
+                    connection.commit();
+                    return ps;
+                } catch (SQLException e) {
+                    connection.rollback();
+                    e.printStackTrace();
+                    return null;
+                }
+            });
     }
 }

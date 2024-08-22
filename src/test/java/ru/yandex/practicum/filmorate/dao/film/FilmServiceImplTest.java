@@ -114,8 +114,8 @@ class FilmServiceImplTest {
         int duration = 211;
 
         Genre genre = new Genre();
-        genre.setId(2);
-        genre.setName(Genres.Драма);
+        genre.setId(4);
+        genre.setName(Genres.Триллер);
         List<Genre> genres = new ArrayList<>();
         genres.add(genre);
 

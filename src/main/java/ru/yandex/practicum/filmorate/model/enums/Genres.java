@@ -48,10 +48,4 @@ public enum Genres {
             return null;
         }
     }
-//    COMEDY,
-//    DRAMA,
-//    CARTOON,
-//    THRILLER,
-//    DOCUMENTARY,
-//    ACTION
 }
